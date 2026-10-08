@@ -1,5 +1,5 @@
 services:
-  wissels:
+  frontend:
     build: .
     ports:
       - "8080:80"
