@@ -1,6 +1,7 @@
 // Uitvoeren: node schedule.test.js
 const assert = require('assert');
-const { FIELD, minutes, generate } = require('./schedule.js');
+const { CATS, minutes, generate } = require('./schedule.js');
+const FIELD = CATS.JO9.field;
 
 const ids = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
 const mk = (interval, keepers) => ({ present: ids, keepers, interval, slots: [], keeperBySlot: [] });
@@ -33,5 +34,22 @@ for (let run = 0; run < 50; run++) {
   const bench = x => ids.filter(id => !x.slots[0].includes(id));
   assert.deepStrictEqual(bench(m1).filter(id => bench(m2).includes(id)), []);
 }
+
+// Categorieën: aantal spelers en speeltijd volgens KNVB
+const play = (c, keepers, interval) => {
+  const m = generate({ cat: c, present: ids, keepers, interval, slots: [], keeperBySlot: [] }, []);
+  return { m, total: m.slots.length * interval };
+};
+let r = play('JO10', A, 6.25);
+assert.strictEqual(r.total, 50);
+r.m.slots.forEach(on => assert.strictEqual(on.length, 6));
+r = play('JO11', ['a', 'a', 'b', 'b'], 7.5);
+assert.strictEqual(r.total, 60);
+r.m.slots.forEach(on => assert.strictEqual(on.length, 8));
+assert.deepStrictEqual(r.m.keeperBySlot, ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']);
+r = play('JO7', [], 7.5); // geen keeper, 4 spelers
+assert.strictEqual(r.total, 45);
+r.m.slots.forEach(on => assert.strictEqual(on.length, 4));
+assert.deepStrictEqual(r.m.keeperBySlot, Array(6).fill(null));
 
 console.log('ok');

@@ -1,6 +1,6 @@
 # wissels
 
-Wisselschema voor JO9-wedstrijden (6 tegen 6, 4x10 minuten). Statische webapp (`index.html` + `schedule.js`) zonder backend: alle gegevens worden in de `localStorage` van de browser opgeslagen.
+Wisselschema voor pupillenvoetbal volgens de KNVB-wedstrijdvormen 2026/'27: JO7 (4 tegen 4), JO8–JO10 (6 tegen 6) en JO11/MO11/JO12 (8 tegen 8). Kies per team de categorie; speeltijd, aantal spelers en keeperblokken volgen daaruit. Statische webapp (`index.html` + `schedule.js`) zonder backend: alle gegevens worden in de `localStorage` van de browser opgeslagen.
 
 ## Lokaal openen
 
@@ -45,6 +45,8 @@ Omdat het een statische site is, kun je `index.html` en `schedule.js` ook op elk
 ## Let op: gegevens
 
 Teams en wedstrijden staan in de browser van de gebruiker, niet op de server. Een ander apparaat, een andere browser of het wissen van browsergegevens betekent een lege app. Een nieuwe deploy raakt de opgeslagen gegevens niet, zolang het domein (en de poort) gelijk blijft.
+
+Gebruik onderaan de app **Back-up downloaden** om alles als JSON-bestand op te slaan, en **Back-up terugzetten** om het (op een ander apparaat of adres) terug te zetten. Terugzetten vervangt de huidige gegevens in die browser.
 
 ## Tests
 

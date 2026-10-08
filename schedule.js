@@ -1,7 +1,18 @@
 // Wisselschema-logica. Werkt in de browser (globals) en in Node (tests).
-const FIELD = 6, MATCH_MIN = 40, KEEPER_BLOCK = 10; // JO9: 6 tegen 6, 4x10 min, keeper minimaal per 10 min
+// KNVB-wedstrijdvormen seizoen 2026/'27. Een blok loopt tot de time-out of rust; de keeper wisselt alleen op een blokgrens.
+const CATS = {
+  JO7:  { field: 4, keeper: false, blocks: 6, block: 7.5,  label: 'JO7 – 4 tegen 4, 3 x 15 min, geen keeper' },
+  JO8:  { field: 6, keeper: true,  blocks: 4, block: 10,   label: 'JO8 – 6 tegen 6, 2 x 20 min' },
+  JO9:  { field: 6, keeper: true,  blocks: 4, block: 10,   label: 'JO9 – 6 tegen 6, 2 x 20 min' },
+  JO10: { field: 6, keeper: true,  blocks: 4, block: 12.5, label: 'JO10 – 6 tegen 6, 2 x 25 min' },
+  JO11: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'JO11 – 8 tegen 8, 2 x 30 min' },
+  MO11: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'MO11 – 8 tegen 8, 2 x 30 min' },
+  JO12: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'JO12 – 8 tegen 8, 2 x 30 min' },
+};
+const cat = m => CATS[m.cat] || CATS.JO9;
+const intervals = c => [c.block / 2, c.block]; // wisselen per half blok of per blok
 
-// Wedstrijd: { present:[id], keepers:[id|null per kwart, 4x], interval:5|10, slots:[[ids op veld incl. keeper]], keeperBySlot:[id|null] }
+// Wedstrijd: { cat, present:[id], keepers:[id|null per blok], interval, slots:[[ids op veld incl. keeper]], keeperBySlot:[id|null] }
 function minutes(m) {
   const r = {};
   m.present.forEach(id => r[id] = 0);
@@ -34,13 +45,13 @@ function shuffle(a) {
 
 // Vult m.slots en m.keeperBySlot. Eerlijk binnen de wedstrijd (minuten), en over wedstrijden (eerste wissel, tekort).
 function generate(m, history) {
-  const s = stats(history), zero = { benchStarts: 0, diff: 0 }, st = id => s[id] || zero;
+  const c = cat(m), s = stats(history), zero = { benchStarts: 0, diff: 0 }, st = id => s[id] || zero;
   const mins = {};
   m.present.forEach(id => mins[id] = 0);
   m.slots = [];
   m.keeperBySlot = [];
-  for (let i = 0; i < MATCH_MIN / m.interval; i++) {
-    const kq = m.keepers[Math.floor(i * m.interval / KEEPER_BLOCK)];
+  for (let i = 0; i < c.blocks * c.block / m.interval; i++) {
+    const kq = c.keeper ? m.keepers[Math.floor(i * m.interval / c.block)] : null;
     const k = m.present.includes(kq) ? kq : null;
     const prev = m.slots[i - 1] || [];
     const cands = shuffle(m.present.filter(id => id !== k)).sort((a, b) =>
@@ -48,7 +59,7 @@ function generate(m, history) {
       (i === 0 ? st(b).benchStarts - st(a).benchStarts : 0) || // vaak eerste wissel geweest -> nu starten
       st(a).diff - st(b).diff ||                               // minutentekort uit vorige wedstrijden eerst
       prev.includes(b) - prev.includes(a));                    // zo min mogelijk wissels
-    const on = (k ? [k] : []).concat(cands.slice(0, FIELD - (k ? 1 : 0)));
+    const on = (k ? [k] : []).concat(cands.slice(0, c.field - (k ? 1 : 0)));
     on.forEach(id => mins[id] += m.interval);
     m.slots.push(on);
     m.keeperBySlot.push(k);
@@ -56,4 +67,4 @@ function generate(m, history) {
   return m;
 }
 
-if (typeof module !== 'undefined') module.exports = { FIELD, minutes, stats, generate };
+if (typeof module !== 'undefined') module.exports = { CATS, cat, intervals, minutes, stats, generate };
