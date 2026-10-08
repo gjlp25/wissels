@@ -10,13 +10,14 @@
   section { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 3px #0002; overflow-x: auto }
   button { padding: .4rem .8rem; border: 1px solid #2a7a3a; background: #2a7a3a; color: #fff; border-radius: 4px; cursor: pointer }
   button.alt { background: #fff; color: #2a7a3a }
-  input, select { padding: .35rem }
+  input, select { padding: .35rem; font-size: 1rem; max-width: 100% } /* 16px: voorkomt inzoomen op iPhone */
+  input[type=checkbox] { width: 1.25rem; height: 1.25rem; margin: 0; vertical-align: middle }
   .row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .5rem 0 }
   .chip { border: 1px solid #ccc; border-radius: 16px; padding: .2rem .6rem; display: inline-flex; gap: .3rem; align-items: center }
-  .chip button { padding: 0 .4rem; background: none; color: #a00; border: 0 }
+  .chip button { padding: .1rem .4rem; background: none; color: #a00; border: 0; font-size: 1rem }
   table { border-collapse: collapse; width: 100% }
   th, td { border: 1px solid #ddd; padding: .3rem; text-align: center }
-  td:first-child, th:first-child { text-align: left }
+  td:first-child, th:first-child { text-align: left; position: sticky; left: 0; background: #fff } /* namen blijven staan bij scrollen */
   .on { background: #bfe5c4 } .off { background: #f4f4f4 } td.on, td.off { cursor: pointer } .k { background: #ffd966 }
   tr.count td { font-size: .8rem; color: #666 } .bad { color: #c00; font-weight: bold }
   .legend { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .85rem; margin: .6rem 0 }
@@ -30,7 +31,15 @@
     #printOut table { break-inside: avoid } #printOut td.on, #printOut td.off { cursor: auto }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact }
   }
-  #board { position: relative; width: 100%; max-width: 420px; aspect-ratio: 2 / 3.4; margin: auto; touch-action: none; user-select: none }
+  @media (max-width: 600px) {
+    body { padding: .5rem } h1 { font-size: 1.25rem; margin: .3rem 0 .6rem }
+    section { padding: .75rem; margin-bottom: .6rem }
+    th, td { padding: .3rem .15rem; font-size: .85rem }
+    td:first-child, th:first-child { padding-left: .3rem }
+    .token { font-size: .62rem }
+  }
+  /* veld past in het scherm (liggende telefoon), maar nooit smaller dan 280px zodat spelers niet overlappen */
+  #board { position: relative; width: 100%; max-width: min(420px, max(280px, calc((100svh - 5rem) / 1.7))); aspect-ratio: 2 / 3.4; margin: auto; user-select: none }
   #pitch { position: absolute; left: 0; right: 0; top: 0; height: 78%; background: #3d9b4a; border: 3px solid #fff; box-sizing: border-box; border-radius: 4px; overflow: hidden }
   #pitch .mid { position: absolute; left: 0; right: 0; top: 50%; border-top: 2px solid #fff }
   #pitch .circle { position: absolute; left: 50%; top: 50%; width: 28%; aspect-ratio: 1; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%) }
@@ -38,8 +47,8 @@
   #pitch .top { top: -2px } #pitch .bottom { bottom: -2px }
   #bench { position: absolute; left: 0; right: 0; bottom: 0; height: 20%; background: #ddd; border-radius: 6px }
   #bench span { position: absolute; left: 6px; top: 4px; font-size: .75rem; color: #666 }
-  .token { position: absolute; transform: translate(-50%, -50%); width: 54px; height: 54px; border-radius: 50%; background: #1f4fa8; color: #fff;
-           font-size: .7rem; display: flex; align-items: center; justify-content: center; text-align: center; cursor: grab; box-shadow: 0 2px 4px #0006; overflow: hidden }
+  .token { position: absolute; transform: translate(-50%, -50%); width: clamp(40px, 14%, 56px); aspect-ratio: 1; border-radius: 50%; background: #1f4fa8; color: #fff;
+           font-size: .7rem; touch-action: none; /* alleen spelers vangen de vinger, de rest van het veld scrolt gewoon */ display: flex; align-items: center; justify-content: center; text-align: center; cursor: grab; box-shadow: 0 2px 4px #0006; overflow: hidden }
   .token.k { background: #e8a400 }
   .slotbtn.active { background: #174d22 }
 </style>
@@ -122,7 +131,7 @@ if (db.players) { // oude opslag zonder teams: zet alles in één team, keeperli
   db = { teams: [t], team: t.id, matches: db.matches.map(m => ({ ...m, teamId: t.id,
     keepers: [0, 1, 2, 3].map(q => m.keepers[q % m.keepers.length] ?? null) })) };
 }
-let cur = null, slot = 0;
+let cur = null, slot = 0, dragged = null;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -224,10 +233,13 @@ function renderBoard(m) {
   document.querySelectorAll('.token').forEach(t => t.remove());
   const on = m.slots[slot] || [], k = m.keeperBySlot[slot];
   const bench = m.present.filter(id => !on.includes(id));
-  let f = 0;
-  const pos = DEFAULT_POS[cat(m).field];
-  const tokens = on.map(id => [id, id === k ? (m.pos.K || KEEPER_POS) : (m.pos[id] || pos[f++ % pos.length])])
-    .concat(bench.map((id, i) => [id, [(i + 1) * 100 / (bench.length + 1), 89]]));
+  place(m, on, k);
+  const tokens = on.map(id => [id, id === k ? (m.pos.K || KEEPER_POS) : m.pos[id]])
+    .concat(bench.map((id, i) => { // bij meer dan 5 wissels over twee rijen, anders liggen ze over elkaar
+      const per = bench.length > 5 ? Math.ceil(bench.length / 2) : bench.length, row = Math.floor(i / per);
+      const n = Math.min(per, bench.length - row * per);
+      return [id, [(i % per + 1) * 100 / (n + 1), per < bench.length ? 85 + row * 9 : 89]];
+    }));
   tokens.forEach(([id, [x, y]]) => {
     const t = document.createElement('div');
     t.className = 'token' + (id === k ? ' k' : '');
@@ -235,6 +247,22 @@ function renderBoard(m) {
     t.style.left = x + '%'; t.style.top = y + '%';
     $('#board').append(t);
   });
+}
+
+// Geeft elke veldspeler een vaste plek (bewaard in m.pos), zodat niemand verspringt als je een ander sleept.
+// Ligt een plek te dicht op een andere speler (bv. iemand terug van de bank), dan krijgt die speler een vrije startplek;
+// de net gesleepte speler houdt altijd zijn plek.
+function place(m, on, k) {
+  const near = (p, q) => Math.abs(p[0] - q[0]) < 12 && Math.abs(p[1] - q[1]) < 8;
+  const taken = k ? [m.pos.K || KEEPER_POS] : [], free = p => !taken.some(q => near(p, q));
+  const field = on.filter(id => id !== k).sort((a, b) => (b === dragged) - (a === dragged));
+  field.forEach(id => { if (m.pos[id] && free(m.pos[id])) taken.push(m.pos[id]); else delete m.pos[id]; });
+  field.filter(id => !m.pos[id]).forEach(id => {
+    const p = DEFAULT_POS[cat(m).field].find(free) || [50, 50];
+    taken.push(m.pos[id] = p.slice());
+  });
+  dragged = null;
+  save();
 }
 
 function renderStats() {
@@ -338,16 +366,19 @@ $('#board').onpointerdown = e => {
   const t = e.target.closest('.token'); if (!t) return;
   t.setPointerCapture(e.pointerId);
   const r = $('#board').getBoundingClientRect(), clamp = v => Math.min(97, Math.max(3, v));
+  // afstand tussen vinger en midden van de speler, zodat die niet naar de vinger springt
+  const dx = e.clientX - r.left - parseFloat(t.style.left) / 100 * r.width, dy = e.clientY - r.top - parseFloat(t.style.top) / 100 * r.height;
   t.onpointermove = ev => {
-    t.style.left = clamp((ev.clientX - r.left) / r.width * 100) + '%';
-    t.style.top = clamp((ev.clientY - r.top) / r.height * 100) + '%';
+    t.style.left = clamp((ev.clientX - dx - r.left) / r.width * 100) + '%';
+    t.style.top = clamp((ev.clientY - dy - r.top) / r.height * 100) + '%';
   };
+  t.onpointercancel = () => { t.onpointermove = t.onpointerup = t.onpointercancel = null; render(); };
   t.onpointerup = () => {
-    t.onpointermove = t.onpointerup = null;
+    t.onpointermove = t.onpointerup = t.onpointercancel = null;
     const m = match(), id = t.dataset.id, x = parseFloat(t.style.left), y = parseFloat(t.style.top), toField = y < PITCH_Y;
     if (id === m.keeperBySlot[slot]) { if (toField) m.pos.K = [x, y]; }
-    else if (toField) { if (!m.slots[slot].includes(id)) m.slots[slot].push(id); m.pos[id] = [x, y]; }
-    else m.slots[slot] = m.slots[slot].filter(p => p !== id);
+    else if (toField) { if (!m.slots[slot].includes(id)) m.slots[slot].push(id); m.pos[id] = [x, y]; dragged = id; }
+    else { m.slots[slot] = m.slots[slot].filter(p => p !== id); delete m.pos[id]; }
     render();
   };
 };
