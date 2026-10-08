@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wisselschema JO9</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 1rem; background: #eef2ee; color: #222 }
+  h1 { font-size: 1.4rem } h2 { font-size: 1.1rem; margin-top: 0 }
+  section { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 3px #0002; overflow-x: auto }
+  button { padding: .4rem .8rem; border: 1px solid #2a7a3a; background: #2a7a3a; color: #fff; border-radius: 4px; cursor: pointer }
+  button.alt { background: #fff; color: #2a7a3a }
+  input, select { padding: .35rem }
+  .row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .5rem 0 }
+  .chip { border: 1px solid #ccc; border-radius: 16px; padding: .2rem .6rem; display: inline-flex; gap: .3rem; align-items: center }
+  .chip button { padding: 0 .4rem; background: none; color: #a00; border: 0 }
+  table { border-collapse: collapse; width: 100% }
+  th, td { border: 1px solid #ddd; padding: .3rem; text-align: center }
+  td:first-child, th:first-child { text-align: left }
+  td.on { background: #bfe5c4; cursor: pointer } td.off { background: #f4f4f4; cursor: pointer } td.k { background: #ffd966 }
+  tr.count td { font-size: .8rem; color: #666 } td.bad { color: #c00; font-weight: bold }
+  #board { position: relative; width: 100%; max-width: 420px; aspect-ratio: 2 / 3.4; margin: auto; touch-action: none; user-select: none }
+  #pitch { position: absolute; left: 0; right: 0; top: 0; height: 78%; background: #3d9b4a; border: 3px solid #fff; box-sizing: border-box; border-radius: 4px; overflow: hidden }
+  #pitch .mid { position: absolute; left: 0; right: 0; top: 50%; border-top: 2px solid #fff }
+  #pitch .circle { position: absolute; left: 50%; top: 50%; width: 28%; aspect-ratio: 1; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%) }
+  #pitch .box { position: absolute; left: 30%; width: 40%; height: 12%; border: 2px solid #fff }
+  #pitch .top { top: -2px } #pitch .bottom { bottom: -2px }
+  #bench { position: absolute; left: 0; right: 0; bottom: 0; height: 20%; background: #ddd; border-radius: 6px }
+  #bench span { position: absolute; left: 6px; top: 4px; font-size: .75rem; color: #666 }
+  .token { position: absolute; transform: translate(-50%, -50%); width: 54px; height: 54px; border-radius: 50%; background: #1f4fa8; color: #fff;
+           font-size: .7rem; display: flex; align-items: center; justify-content: center; text-align: center; cursor: grab; box-shadow: 0 2px 4px #0006; overflow: hidden }
+  .token.k { background: #e8a400 }
+  .slotbtn.active { background: #174d22 }
+</style>
+</head>
+<body>
+<h1>Wisselschema JO9</h1>
+
+<section>
+  <h2>Team</h2>
+  <div class="row">
+    <select id="teamSel"></select> <button class="alt" id="delTeam">Verwijder team</button>
+  </div>
+  <form class="row" id="addTeam"><input id="tname" placeholder="Nieuw team, bv. JO9-1" required><button>Team aanmaken</button></form>
+</section>
+
+<section class="needTeam">
+  <h2>Spelers</h2>
+  <div class="row" id="players"></div>
+  <form class="row" id="addPlayer"><input id="pname" placeholder="Naam" required><button>Toevoegen</button></form>
+</section>
+
+<section class="needTeam">
+  <h2>Wedstrijden</h2>
+  <div class="row" id="matches"></div>
+  <button id="newMatch">Nieuwe wedstrijd</button>
+</section>
+
+<section id="matchSec" hidden>
+  <h2>Wedstrijd</h2>
+  <div class="row">
+    <input type="date" id="mDate"> <input id="mOpp" placeholder="Tegenstander">
+    <label>Wissel elke <select id="mInt"><option value="5">5</option><option value="10">10</option></select> min</label>
+  </div>
+  <div id="mPlayers"></div>
+  <p><small>Vink per kwart (10 min) de keeper aan. Geen keeper aangevinkt = 6 veldspelers.</small></p>
+  <div class="row"><button id="gen">Nieuw wisselvoorstel</button> <button class="alt" id="delMatch">Verwijder wedstrijd</button></div>
+  <p id="firstBench"></p>
+  <div id="schedule"></div>
+  <p><small>Klik op een vakje om een speler handmatig in of uit te zetten. K = keeper.</small></p>
+</section>
+
+<section id="boardSec" hidden>
+  <h2>Opstelling</h2>
+  <div class="row" id="slots"></div>
+  <div id="board">
+    <div id="pitch"><div class="mid"></div><div class="circle"></div><div class="box top"></div><div class="box bottom"></div></div>
+    <div id="bench"><span>Wissels</span></div>
+  </div>
+  <p><small>Sleep spelers over het veld, of tussen veld en wisselbank (past het schema aan).</small></p>
+</section>
+
+<section class="needTeam">
+  <h2>Totalen (alle wedstrijden)</h2>
+  <div id="stats"></div>
+</section>
+
+<script src="schedule.js"></script>
+<script>
+const KEY = 'wissels-jo9', PITCH_Y = 78; // tokens met y < 78% staan op het veld
+const DEFAULT_POS = [[25, 58], [75, 58], [50, 42], [28, 20], [72, 20], [50, 10]], KEEPER_POS = [50, 71];
+let db = JSON.parse(localStorage.getItem(KEY) || '{"teams":[],"matches":[]}');
+if (db.players) { // oude opslag zonder teams: zet alles in één team, keeperlijst wordt keeper per kwart
+  const t = { id: 't' + Date.now().toString(36), name: 'Mijn team', players: db.players };
+  db = { teams: [t], team: t.id, matches: db.matches.map(m => ({ ...m, teamId: t.id,
+    keepers: [0, 1, 2, 3].map(q => m.keepers[q % m.keepers.length] ?? null) })) };
+}
+let cur = null, slot = 0;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const team = () => db.teams.find(t => t.id === db.team);
+const players = () => team()?.players ?? [];
+const name = id => db.teams.flatMap(t => t.players).find(p => p.id === id)?.name ?? '?';
+const match = () => db.matches.find(m => m.id === cur);
+const sorted = () => db.matches.filter(m => m.teamId === db.team).sort((a, b) => a.date.localeCompare(b.date));
+const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)); };
+const save = () => localStorage.setItem(KEY, JSON.stringify(db));
+const regen = m => { generate(m, history(m)); slot = 0; };
+
+function render() {
+  save();
+  $('#teamSel').innerHTML = db.teams.map(t =>
+    `<option value="${t.id}" ${t.id === db.team ? 'selected' : ''}>${esc(t.name)}</option>`).join('') || '<option>Nog geen team</option>';
+  document.querySelectorAll('.needTeam').forEach(s => s.hidden = !team());
+  $('#players').innerHTML = players().map(p =>
+    `<span class="chip">${esc(p.name)}<button data-del="${p.id}" title="Verwijder">×</button></span>`).join('') || 'Nog geen spelers.';
+  $('#matches').innerHTML = sorted().map(m =>
+    `<button class="${m.id === cur ? '' : 'alt'}" data-m="${m.id}">${esc(m.date)} ${esc(m.opponent)}</button>`).join('');
+  renderStats();
+  const m = match();
+  $('#matchSec').hidden = $('#boardSec').hidden = !m;
+  if (m) { renderMatch(m); renderBoard(m); }
+}
+
+function renderMatch(m) {
+  $('#mDate').value = m.date; $('#mOpp').value = m.opponent; $('#mInt').value = m.interval;
+  $('#mPlayers').innerHTML = '<table><tr><th>Speler</th><th>Aanwezig</th><th>Keeper 0\'</th><th>10\'</th><th>20\'</th><th>30\'</th></tr>' +
+    players().map(p => { const here = m.present.includes(p.id);
+      return `<tr><td>${esc(p.name)}</td><td><input type="checkbox" data-present="${p.id}" ${here ? 'checked' : ''}></td>` +
+        m.keepers.map((k, q) => `<td><input type="checkbox" data-keeper="${p.id}" data-q="${q}" ${k === p.id ? 'checked' : ''} ${here ? '' : 'disabled'}></td>`).join('') + '</tr>';
+    }).join('') + '</table>';
+  const min = minutes(m);
+  const head = m.slots.map((_, i) => `<th>${i * m.interval}'</th>`).join('');
+  const rows = m.present.map(id => `<tr><td>${esc(name(id))}</td>` + m.slots.map((on, i) =>
+    m.keeperBySlot[i] === id ? '<td class="k">K</td>'
+      : `<td class="${on.includes(id) ? 'on' : 'off'}" data-cell="${i}" data-id="${id}">${on.includes(id) ? '●' : ''}</td>`).join('') +
+    `<td>${min[id]}</td></tr>`).join('');
+  const count = '<tr class="count"><td>Op veld</td>' + m.slots.map(on =>
+    `<td class="${on.length === FIELD ? '' : 'bad'}">${on.length}</td>`).join('') + '<td></td></tr>';
+  $('#schedule').innerHTML = m.slots.length ? `<table><tr><th>Speler</th>${head}<th>Min</th></tr>${rows}${count}</table>` : '';
+  const first = m.slots[0] ? m.present.filter(id => !m.slots[0].includes(id)) : [];
+  $('#firstBench').textContent = first.length ? 'Eerste wissels: ' + first.map(name).join(', ') : '';
+}
+
+function renderBoard(m) {
+  $('#slots').innerHTML = m.slots.map((_, i) =>
+    `<button class="slotbtn ${i === slot ? 'active' : 'alt'}" data-slot="${i}">${i * m.interval}'</button>`).join('');
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  const on = m.slots[slot] || [], k = m.keeperBySlot[slot];
+  const bench = m.present.filter(id => !on.includes(id));
+  let f = 0;
+  const tokens = on.map(id => [id, id === k ? (m.pos.K || KEEPER_POS) : (m.pos[id] || DEFAULT_POS[f++ % DEFAULT_POS.length])])
+    .concat(bench.map((id, i) => [id, [(i + 1) * 100 / (bench.length + 1), 89]]));
+  tokens.forEach(([id, [x, y]]) => {
+    const t = document.createElement('div');
+    t.className = 'token' + (id === k ? ' k' : '');
+    t.dataset.id = id; t.textContent = name(id);
+    t.style.left = x + '%'; t.style.top = y + '%';
+    $('#board').append(t);
+  });
+}
+
+function renderStats() {
+  const s = stats(sorted());
+  $('#stats').innerHTML = '<table><tr><th>Speler</th><th>Wedstr.</th><th>Minuten</th><th>Gem.</th><th>Eerste wissel</th><th>Keeper min</th></tr>' +
+    players().map(p => { const x = s[p.id] || { matches: 0, minutes: 0, benchStarts: 0, keeper: 0 };
+      return `<tr><td>${esc(p.name)}</td><td>${x.matches}</td><td>${x.minutes}</td><td>${x.matches ? Math.round(x.minutes / x.matches) : '-'}</td><td>${x.benchStarts}</td><td>${x.keeper}</td></tr>`;
+    }).join('') + '</table>';
+}
+
+// Teams
+$('#addTeam').onsubmit = e => {
+  e.preventDefault();
+  const t = { id: 't' + Date.now().toString(36), name: $('#tname').value.trim(), players: [] };
+  db.teams.push(t); db.team = t.id; cur = null;
+  $('#tname').value = '';
+  render();
+};
+$('#teamSel').onchange = e => { db.team = e.target.value; cur = null; render(); };
+$('#delTeam').onclick = () => {
+  if (!team() || !confirm(`Team ${team().name} met alle wedstrijden verwijderen?`)) return;
+  db.matches = db.matches.filter(m => m.teamId !== db.team);
+  db.teams = db.teams.filter(t => t.id !== db.team);
+  db.team = db.teams[0]?.id; cur = null;
+  render();
+};
+
+// Spelers
+$('#addPlayer').onsubmit = e => {
+  e.preventDefault();
+  team().players.push({ id: Date.now().toString(36), name: $('#pname').value.trim() });
+  $('#pname').value = '';
+  render();
+};
+$('#players').onclick = e => {
+  const id = e.target.dataset.del;
+  if (id && confirm(`${name(id)} verwijderen?`)) { team().players = players().filter(p => p.id !== id); render(); }
+};
+
+// Wedstrijden
+$('#newMatch').onclick = () => {
+  const m = { id: Date.now().toString(36), teamId: db.team, date: new Date().toISOString().slice(0, 10), opponent: '', interval: 5,
+              present: players().map(p => p.id), keepers: [null, null, null, null], slots: [], keeperBySlot: [], pos: {} };
+  db.matches.push(m); cur = m.id; regen(m); render();
+};
+$('#matches').onclick = e => { if (e.target.dataset.m) { cur = e.target.dataset.m; slot = 0; render(); } };
+$('#delMatch').onclick = () => {
+  if (confirm('Wedstrijd verwijderen?')) { db.matches = db.matches.filter(m => m.id !== cur); cur = null; render(); }
+};
+$('#gen').onclick = () => { regen(match()); render(); };
+$('#mDate').onchange = e => { match().date = e.target.value; render(); };
+$('#mOpp').onchange = e => { match().opponent = e.target.value; render(); };
+$('#mInt').onchange = e => { const m = match(); m.interval = +e.target.value; regen(m); render(); };
+$('#matchSec').onchange = e => {
+  const m = match(), t = e.target;
+  if (t.dataset.present) m.present = t.checked ? m.present.concat(t.dataset.present) : m.present.filter(x => x !== t.dataset.present);
+  else if (t.dataset.keeper) m.keepers[t.dataset.q] = t.checked ? t.dataset.keeper : null; // één keeper per kwart
+  else return;
+  m.keepers = m.keepers.map(k => m.present.includes(k) ? k : null);
+  regen(m); render();
+};
+$('#schedule').onclick = e => {
+  const c = e.target.dataset.cell; if (c === undefined) return;
+  const m = match(), id = e.target.dataset.id;
+  m.slots[c] = m.slots[c].includes(id) ? m.slots[c].filter(x => x !== id) : m.slots[c].concat(id);
+  render();
+};
+
+// Opstelling: periode kiezen en slepen
+$('#slots').onclick = e => { if (e.target.dataset.slot) { slot = +e.target.dataset.slot; render(); } };
+$('#board').onpointerdown = e => {
+  const t = e.target.closest('.token'); if (!t) return;
+  t.setPointerCapture(e.pointerId);
+  const r = $('#board').getBoundingClientRect(), clamp = v => Math.min(97, Math.max(3, v));
+  t.onpointermove = ev => {
+    t.style.left = clamp((ev.clientX - r.left) / r.width * 100) + '%';
+    t.style.top = clamp((ev.clientY - r.top) / r.height * 100) + '%';
+  };
+  t.onpointerup = () => {
+    t.onpointermove = t.onpointerup = null;
+    const m = match(), id = t.dataset.id, x = parseFloat(t.style.left), y = parseFloat(t.style.top), toField = y < PITCH_Y;
+    if (id === m.keeperBySlot[slot]) { if (toField) m.pos.K = [x, y]; }
+    else if (toField) { if (!m.slots[slot].includes(id)) m.slots[slot].push(id); m.pos[id] = [x, y]; }
+    else m.slots[slot] = m.slots[slot].filter(p => p !== id);
+    render();
+  };
+};
+
+render();
+</script>
+</body>
+</html>
