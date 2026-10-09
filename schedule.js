@@ -43,26 +43,60 @@ function shuffle(a) {
   return a;
 }
 
-// Vult m.slots en m.keeperBySlot. Eerlijk binnen de wedstrijd (minuten), en over wedstrijden (eerste wissel, tekort).
+// Minimize consecutive bench occurrences across the whole schedule first.
+// Only selected keepers need distinct lookahead states (at most four in CATS).
+// Other players are interchangeable for feasibility; choose their identities fairly.
 function generate(m, history) {
   const c = cat(m), s = stats(history), zero = { benchStarts: 0, diff: 0 }, st = id => s[id] || zero;
-  const mins = {};
-  m.present.forEach(id => mins[id] = 0);
+  const size = Math.min(c.field, m.present.length), mins = Object.fromEntries(m.present.map(id => [id, 0]));
+  const keepers = Array.from({ length: c.blocks * c.block / m.interval }, (_, i) => {
+    const k = c.keeper ? m.keepers[Math.floor(i * m.interval / c.block)] : null;
+    return m.present.includes(k) ? k : null;
+  });
+  const special = [...new Set(keepers.filter(k => k !== null))];
+  const ordinary = m.present.filter(id => !special.includes(id));
+  const ordinaryIds = new Set(ordinary);
+  const states = [];
+  for (let mask = 0; mask < 2 ** special.length; mask++) {
+    const on = special.filter((_, j) => mask & (2 ** j)), count = size - on.length;
+    if (count >= 0 && count <= ordinary.length) states.push({ on, count });
+  }
+  const allowed = keepers.map(k => states.filter(x => k === null || x.on.includes(k)));
+  // Minimum overlap of the two ordinary bench sets, plus actual keeper bench overlap.
+  const cost = (a, b) => Math.max(0, ordinary.length - a.count - b.count) +
+    special.filter(id => !a.on.includes(id) && !b.on.includes(id)).length;
+  const future = allowed.map(() => new Map());
+  for (let i = allowed.length - 1; i >= 0; i--) {
+    for (const a of allowed[i]) future[i].set(a, i === allowed.length - 1 ? 0 :
+      Math.min(...allowed[i + 1].map(b => cost(a, b) + future[i + 1].get(b))));
+  }
   m.slots = [];
-  m.keeperBySlot = [];
-  for (let i = 0; i < c.blocks * c.block / m.interval; i++) {
-    const kq = c.keeper ? m.keepers[Math.floor(i * m.interval / c.block)] : null;
-    const k = m.present.includes(kq) ? kq : null;
+  m.keeperBySlot = keepers;
+  let previous;
+  for (let i = 0; i < keepers.length; i++) {
     const prev = m.slots[i - 1] || [];
-    const cands = shuffle(m.present.filter(id => id !== k)).sort((a, b) =>
+    const ranked = shuffle(m.present.slice()).sort((a, b) =>
       mins[a] - mins[b] ||
-      (i === 0 ? st(b).benchStarts - st(a).benchStarts : 0) || // vaak eerste wissel geweest -> nu starten
-      st(a).diff - st(b).diff ||                               // minutentekort uit vorige wedstrijden eerst
-      prev.includes(b) - prev.includes(a));                    // zo min mogelijk wissels
-    const on = (k ? [k] : []).concat(cands.slice(0, c.field - (k ? 1 : 0)));
+      (i === 0 ? st(b).benchStarts - st(a).benchStarts : 0) ||
+      st(a).diff - st(b).diff || prev.includes(b) - prev.includes(a));
+    const rankedOrdinary = ranked.filter(id => ordinaryIds.has(id));
+    // Bringing ordinary bench players on first realizes the transition's minimum.
+    if (i) rankedOrdinary.sort((a, b) => prev.includes(a) - prev.includes(b));
+    const minimum = Math.min(...allowed[i].map(a => (previous ? cost(previous, a) : 0) + future[i].get(a)));
+    const choices = allowed[i].filter(a => (previous ? cost(previous, a) : 0) + future[i].get(a) === minimum)
+      .map(a => ({ state: a, on: a.on.concat(rankedOrdinary.slice(0, a.count)) }));
+    // Lexicographic priority: minutes, bench starts, historical deficit, then switches.
+    choices.sort((a, b) => {
+      for (const id of ranked) {
+        const diff = Number(b.on.includes(id)) - Number(a.on.includes(id));
+        if (diff) return diff;
+      }
+      return 0;
+    });
+    const { state, on } = choices[0];
+    previous = state;
     on.forEach(id => mins[id] += m.interval);
     m.slots.push(on);
-    m.keeperBySlot.push(k);
   }
   return m;
 }
