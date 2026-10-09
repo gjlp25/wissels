@@ -50,9 +50,12 @@ for file in ['index.html', 'uitleg.html']:
     before, after = Content(), Content()
     before.feed((args.baseline/file).read_text())
     after.feed((args.root/file).read_text())
+    credit = 'Gemaakt door Robert Postma'
+    assert after.text.count(credit) == 1, file
+    after.text.remove(credit)
     assert before.text == after.text, file
     assert before.attributes == after.attributes, file
-    results[file + '_copy_and_attributes_identical'] = True
+    results[file + '_copy_and_attributes_identical_except_approved_credit'] = True
 script = lambda root: re.search(r'<script>([\s\S]*?)</script>', (root/'index.html').read_text())[1].encode()
 assert script(args.baseline) == script(args.root)
 assert (args.baseline/'schedule.js').read_bytes() == (args.root/'schedule.js').read_bytes()
@@ -78,6 +81,30 @@ try:
         context.route('**/*', route)
         page = context.new_page()
         page.on('pageerror', lambda e: errors.append(str(e)))
+        def assert_footer(label):
+            credit = page.locator('footer .creator-credit')
+            assert credit.count() == 1 and credit.inner_text() == 'Gemaakt door Robert Postma'
+            page.evaluate('window.scrollTo(0, document.documentElement.scrollHeight)')
+            assert credit.is_visible()
+            geometry = credit.evaluate("""e => {
+                const r=e.getBoundingClientRect(), f=e.closest('footer'), fr=f.getBoundingClientRect();
+                const previous=f.previousElementSibling.getBoundingClientRect();
+                const range=document.createRange(); range.selectNodeContents(e);
+                const text=range.getBoundingClientRect();
+                return {left:r.left, right:r.right, top:r.top, bottom:r.bottom,
+                    text_left:text.left, text_right:text.right, text_top:text.top, text_bottom:text.bottom,
+                    width:innerWidth, height:innerHeight, footer_top:fr.top,
+                    previous_bottom:previous.bottom, position:getComputedStyle(f).position,
+                    centered:getComputedStyle(e).textAlign};
+            }""")
+            assert geometry['left'] >= 0 and geometry['right'] <= geometry['width'], geometry
+            assert 0 <= geometry['top'] < geometry['bottom'] <= geometry['height'], geometry
+            assert geometry['left'] <= geometry['text_left'] <= geometry['text_right'] <= geometry['right'], geometry
+            assert geometry['top'] <= geometry['text_top'] <= geometry['text_bottom'] <= geometry['bottom'], geometry
+            assert geometry['footer_top'] >= geometry['previous_bottom'], geometry
+            assert geometry['position'] == 'static' and geometry['centered'] == 'center', geometry
+            page.screenshot(path=str(args.output/f'{label}-footer.png'))
+            results[label + '_footer_visible_unclipped_natural_flow'] = geometry
         page.goto(base + '/index.html')
         assert page.locator('header img').evaluate("e=>e.complete && e.naturalWidth===640 && e.getAttribute('src')==='assets/branding/logo.webp' && e.alt===''")
         results['approved_local_header_logo'] = 'assets/branding/logo.webp'
@@ -145,6 +172,7 @@ try:
             assert geometry['padding'] == '0px' and geometry['border'] == '0px' and geometry['overflow'] == 'visible'
             assert geometry['position'] == 'relative' and geometry['input'] == '16px'
             assert data() == snapshot
+            assert_footer('app-' + label)
             page.screenshot(path=str(args.output/f'app-{label}.png'), full_page=True)
             for name, selector in [('match','#matchSec'),('pitch','#boardSec'),('totals','section:has(#stats)')]:
                 page.locator(selector).screenshot(path=str(args.output/f'{name}-{label}.png'))
@@ -246,6 +274,9 @@ try:
         print_copy = page.locator('#printOut').text_content()
         page.emulate_media(media='print')
         assert page.locator('#printOut').is_visible() and page.locator('#matchSec').is_hidden()
+        assert page.locator('footer').is_hidden()
+        assert 'Gemaakt door Robert Postma' not in print_copy
+        results['app_footer_hidden_in_print'] = True
         assert page.locator('#printOut').text_content() == print_copy
         assert page.locator('#printOut').evaluate('e=>e.scrollWidth<=document.documentElement.clientWidth')
         page.locator('#printOut').screenshot(path=str(args.output/'print.png'))
@@ -289,12 +320,17 @@ try:
         for label,width,height in [('desktop',1100,1000),('mobile',375,812),('small-mobile',320,720),('landscape',812,375)]:
             page.set_viewport_size({'width':width,'height':height})
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'), label
+            assert_footer('manual-' + label)
             page.screenshot(path=str(args.output/f'manual-{label}.png'), full_page=True)
             if label in ['desktop','mobile']:
                 page.locator('header').screenshot(path=str(args.output/f'manual-header-{label}.png'))
                 page.locator('main > .intro').first.screenshot(path=str(args.output/f'manual-intro-{label}.png'))
                 for i in range(1,8):
                     page.locator(f'#stap-{i}').screenshot(path=str(args.output/f'manual-step-{i}-{label}.png'))
+        page.emulate_media(media='print')
+        assert page.locator('footer').is_hidden()
+        results['manual_footer_hidden_in_print'] = True
+        page.emulate_media(media='screen')
         page.add_style_tag(content='html { font-size:200% }')
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         page.locator('footer a').click()

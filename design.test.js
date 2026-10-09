@@ -26,6 +26,24 @@ test('headers use the supplied local logo delivered by the existing assets copy'
   assert.match(read('Dockerfile'), /COPY assets\/ \/usr\/share\/nginx\/html\/assets\//);
 });
 
+test('app and manual each credit the creator exactly once in a footer', () => {
+  const credit = 'Gemaakt door Robert Postma';
+  for (const file of ['index.html', 'uitleg.html']) {
+    const html = read(file);
+    assert.equal(html.split(credit).length - 1, 1, file);
+    assert.match(html, /<footer[^>]*>[\s\S]*?<p class="creator-credit">Gemaakt door Robert Postma<\/p>[\s\S]*?<\/footer>/);
+  }
+});
+
+test('creator footers preserve manual return navigation and app print isolation', () => {
+  const app = read('index.html');
+  const manual = read('uitleg.html');
+  assert.match(app, /<\/section>\s*<footer>[\s\S]*?<\/footer>\s*<div id="printOut"><\/div>\s*<script src="schedule.js">/);
+  assert.match(app, /body:has\(#printOut:not\(:empty\)\) > :not\(#printOut\) \{ display: none !important \}/);
+  assert.match(manual, /<footer><p><a class="button" href="index.html">Terug naar Wisselschema<\/a><\/p>/);
+  assert.match(manual, /header, footer, \.contents \{ display: none \}/);
+});
+
 test('visual refactor preserves the exact production scheduling and DOM scripts', () => {
   assert.equal(hash(read('index.html').match(/<script>([\s\S]*?)<\/script>/)[1]), '080f82e3c31c8cb00c71fbd2ed94c36b3e4b5d9619a5edb54fc9475c7db973cd');
   assert.equal(hash(fs.readFileSync('schedule.js')), '41094cfd5f553df63f2cfa4ec21694c81ba440c9ed37821d63062ca05340c2e2');
