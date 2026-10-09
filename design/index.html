@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wisselschema · KNVB Fair-Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #006948;
+    --primary-hover: #005137;
+    --primary-light: #e6f5ef;
+    --primary-container: #00855d;
+    --secondary: #006398;
+    --secondary-light: #e0f2fe;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --amber-border: #fde68a;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --surface: #f8fafc;
+    --surface-card: #ffffff;
+    --surface-subtle: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --pitch-green: #0b694b;
+    --pitch-pattern: #085a40;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header & Brand */
+  header.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .brand-badge {
+    background: var(--primary);
+    color: #fff;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.15rem;
+    box-shadow: 0 2px 4px rgba(0, 105, 72, 0.25);
+  }
+  .brand-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .brand-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* Headings & Section Cards */
+  h1 { font-size: 1.35rem; margin: 0; }
+  h2 {
+    font-size: 1.05rem;
+    margin-top: 0;
+    margin-bottom: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  section {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s ease;
+  }
+
+  /* Buttons & Inputs */
+  button, .button-link {
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.95rem;
+    min-height: 40px;
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  button:hover, .button-link:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+  button:focus-visible, .button-link:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+  }
+  button.alt {
+    background: #ffffff;
+    color: var(--text-secondary);
+    border-color: var(--border-strong);
+  }
+  button.alt:hover {
+    background: var(--surface-subtle);
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
+  button.danger {
+    background: #ffffff;
+    color: var(--red);
+    border-color: #fca5a5;
+  }
+  button.danger:hover {
+    background: var(--red-light);
+  }
+
+  input, select {
+    font-family: inherit;
+    padding: 0.45rem 0.75rem;
+    min-height: 40px;
+    font-size: 0.95rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: #ffffff;
+    color: var(--text-primary);
+    transition: border-color 0.15s ease;
+  }
+  input:focus, select:focus {
+    border-color: var(--secondary);
+    outline: none;
+  }
+  input[type=checkbox] {
+    min-height: auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    margin: 0.65rem 0;
+  }
+
+  /* Chips */
+  .chip {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    padding: 0.25rem 0.65rem 0.25rem 0.85rem;
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .chip button {
+    padding: 0.1rem 0.35rem;
+    min-height: auto;
+    background: none;
+    color: var(--text-muted);
+    border: 0;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  .chip button:hover {
+    color: var(--red);
+    background: var(--red-light);
+  }
+
+  /* Tables */
+  .table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin: 0.75rem 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.875rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.4rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+  td:first-child, th:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: #ffffff;
+    font-weight: 500;
+    padding-left: 0.75rem;
+    z-index: 2;
+  }
+  th:first-child {
+    background: var(--surface-subtle);
+  }
+
+  .on {
+    background: #c8ebd0;
+    color: #005137;
+    font-weight: bold;
+  }
+  .off {
+    background: #f8fafc;
+    color: var(--text-muted);
+  }
+  td.on, td.off {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s ease;
+  }
+  td.on:hover { background: #b2e4bc; }
+  td.off:hover { background: #e2e8f0; }
+
+  .k {
+    background: #fef08a;
+    color: #854d0e;
+    font-weight: 700;
+  }
+
+  tr.count td {
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+  }
+  .bad {
+    color: var(--red) !important;
+    background: var(--red-light) !important;
+    font-weight: 700;
+  }
+
+  /* Legenda & Status Notice */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.25rem;
+    font-size: 0.8rem;
+    margin: 0.85rem 0 0.25rem;
+    color: var(--text-secondary);
+    background: var(--surface-subtle);
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .legend i {
+    font-style: normal;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6em;
+    height: 1.4em;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  .badge-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Board / Pitch */
+  #board {
+    position: relative;
+    width: 100%;
+    max-width: min(440px, max(280px, calc((100svh - 6rem) / 1.7)));
+    aspect-ratio: 2 / 3.4;
+    margin: 1rem auto;
+    user-select: none;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  #pitch {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 78%;
+    background: repeating-linear-gradient(
+      180deg,
+      #0e7554,
+      #0e7554 20px,
+      #0a6447 20px,
+      #0a6447 40px
+    );
+    border: 3px solid #ffffff;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #pitch .mid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 2px solid rgba(255, 255, 255, 0.8);
+  }
+  #pitch .circle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 28%;
+    aspect-ratio: 1;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  #pitch .box {
+    position: absolute;
+    left: 28%;
+    width: 44%;
+    height: 13%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+  }
+  #pitch .top { top: -2px; }
+  #pitch .bottom { bottom: -2px; }
+
+  #bench {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 22%;
+    background: #e2e8f0;
+    border-top: 3px solid #cbd5e1;
+    padding: 6px 10px;
+  }
+  #bench span {
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .token {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: clamp(42px, 14%, 56px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #006398;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: grab;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+    border: 2px solid #ffffff;
+    overflow: hidden;
+    padding: 2px;
+    line-height: 1.1;
+  }
+  .token:active { cursor: grabbing; }
+  .token.k {
+    background: #d97706;
+    border-color: #fef08a;
+  }
+
+  .slotbtn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
+    min-height: 34px;
+    border-radius: 9999px;
+  }
+  .slotbtn.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* Help info text */
+  .hint-text {
+    font-size: 0.825rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 600px) {
+    body { padding: 0.75rem 0.5rem 2rem; }
+    header.app-header { margin-bottom: 1rem; padding-bottom: 0.75rem; }
+    section { padding: 0.85rem 0.75rem; border-radius: var(--radius-md); }
+    th, td { padding: 0.4rem 0.2rem; font-size: 0.8rem; }
+    td:first-child, th:first-child { padding-left: 0.4rem; }
+  }
+
+  /* Print Out Styling */
+  #printOut { display: none; }
+  @media print {
+    body:has(#printOut:not(:empty)) { background: #fff; max-width: none; padding: 0; }
+    body:has(#printOut:not(:empty)) > :not(#printOut) { display: none !important; }
+    #printOut { display: block; font-size: 11pt; padding: 1.5cm; }
+    #printOut h1 { margin: 0 0 .2rem; font-size: 1.6rem; color: #000; }
+    #printOut h2 { margin: 1rem 0 .3rem; font-size: 1.2rem; color: #000; }
+    #printOut table { break-inside: avoid; border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+    #printOut th, #printOut td { border: 1px solid #444; padding: 4px 6px; text-align: center; }
+    #printOut th { background: #eee; }
+    #printOut td:first-child, #printOut th:first-child { text-align: left; }
+    #printOut td.on, #printOut td.off { cursor: auto; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand-group">
+    <div class="brand-badge">⚡</div>
+    <div>
+      <h1 class="brand-title">Wisselschema</h1>
+      <div class="brand-sub">KNVB Fair-Play Wedstrijddienst</div>
+    </div>
+  </div>
+  <nav aria-label="Hulp">
+    <a class="button-link alt" href="uitleg.html">📖 Uitleg &amp; Handleiding</a>
+  </nav>
+</header>
+
+<section>
+  <h2>Teamselectie &amp; Categorie</h2>
+  <div class="row">
+    <select id="teamSel"></select>
+    <select id="teamCat" class="needTeam" title="Categorie"></select>
+    <button class="alt danger" id="delTeam">Verwijder team</button>
+  </div>
+  <form class="row" id="addTeam" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border);">
+    <input id="tname" placeholder="Nieuw team, bv. JO9-1" required>
+    <select id="tcat" title="Categorie"></select>
+    <button>+ Team aanmaken</button>
+  </form>
+</section>
+
+<section class="needTeam">
+  <h2>Spelerslijst</h2>
+  <div class="row" id="players"></div>
+  <form class="row" id="addPlayer" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border);">
+    <input id="pname" placeholder="Naam speler" required>
+    <button>+ Speler toevoegen</button>
+  </form>
+</section>
+
+<section class="needTeam">
+  <h2>Wedstrijden</h2>
+  <div class="row" id="matches"></div>
+  <div class="row" style="margin-top: 0.75rem;">
+    <button id="newMatch">+ Nieuwe wedstrijd</button>
+  </div>
+</section>
+
+<section id="matchSec" hidden>
+  <h2>Wedstrijdinstellingen &amp; Aanwezigheid</h2>
+  <div class="row">
+    <input type="date" id="mDate">
+    <input id="mOpp" placeholder="Tegenstander">
+    <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.9rem; color:var(--text-secondary); font-weight:500;">
+      Wissel elke <select id="mInt"></select> min
+    </label>
+  </div>
+  <p id="mCat" class="badge-cat" style="margin: 0.5rem 0;"></p>
+  <div id="mPlayers" class="table-container"></div>
+  <p class="hint-text" id="keeperHint"></p>
+  <div class="row" style="margin: 1rem 0;">
+    <button id="gen">⚡ Nieuw wisselvoorstel</button>
+    <button class="alt" id="printBtn">🖨️ Printen / PDF</button>
+    <button class="alt danger" id="delMatch">Wedstrijd verwijderen</button>
+  </div>
+  <p id="firstBench" style="font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;"></p>
+  <div id="schedule" class="table-container"></div>
+  <p class="hint-text">💡 <em>Klik op een groen of grijs vakje om een speler handmatig in of uit te wisselen.</em></p>
+</section>
+
+<section id="boardSec" hidden>
+  <h2>Interactieve Veldopstelling</h2>
+  <p class="hint-text">Kies de periode om de veldbezetting te bekijken en aan te passen:</p>
+  <div class="row" id="slots" style="gap: 0.35rem;"></div>
+  <div id="board">
+    <div id="pitch">
+      <div class="mid"></div>
+      <div class="circle"></div>
+      <div class="box top"></div>
+      <div class="box bottom"></div>
+    </div>
+    <div id="bench"><span>Wisselbank</span></div>
+  </div>
+  <p class="hint-text" style="text-align: center;">Sleep spelers naar een gewenste veldpositie. Slepen tussen veld en wisselbank past automatisch het schema aan.</p>
+</section>
+
+<section class="needTeam">
+  <h2>Seizoentotalen &amp; Eerlijke Speeltijd</h2>
+  <div id="stats" class="table-container"></div>
+</section>
+
+<section>
+  <h2>Gegevensbeheer &amp; Back-up</h2>
+  <div class="row">
+    <button class="alt" id="export">💾 Back-up downloaden (JSON)</button>
+    <button class="alt" id="importBtn">📂 Back-up terugzetten</button>
+    <input type="file" id="import" accept=".json,application/json" hidden>
+  </div>
+  <p class="hint-text">Je gegevens worden veilig lokaal in je browser opgeslagen. Download regelmatig een back-up om je selectie en statistieken over te zetten naar een andere browser of apparaat.</p>
+</section>
+
+<div id="printOut"></div>
+
+<script>
+// Categorieconfiguraties volgens KNVB richtlijnen
+const CATS = {
+  JO7: { label: 'Onder 7 (4v4)', field: 4, keeper: false, block: 10, blocks: 4, intervals: [5, 10] },
+  JO8: { label: 'Onder 8 (6v6)', field: 6, keeper: true, block: 10, blocks: 4, intervals: [5, 10] },
+  JO9: { label: 'Onder 9 (6v6)', field: 6, keeper: true, block: 10, blocks: 4, intervals: [5, 10] },
+  JO10: { label: 'Onder 10 (6v6)', field: 6, keeper: true, block: 12.5, blocks: 4, intervals: [6.25, 12.5] },
+  JO11: { label: 'Onder 11 (8v8)', field: 8, keeper: true, block: 15, blocks: 4, intervals: [5, 7.5, 10, 15] },
+  JO12: { label: 'Onder 12 (8v8)', field: 8, keeper: true, block: 15, blocks: 4, intervals: [5, 7.5, 10, 15] },
+};
+
+const intervals = c => c.intervals;
+const cat = m => CATS[m.cat] || CATS.JO9;
+
+function minutes(m) {
+  const res = {};
+  m.present.forEach(id => res[id] = 0);
+  m.slots.forEach(on => {
+    on.forEach(id => { if (res[id] !== undefined) res[id] += m.interval; });
+  });
+  return res;
+}
+
+function stats(matches) {
+  const res = {};
+  matches.forEach(m => {
+    const min = minutes(m);
+    m.present.forEach(id => {
+      res[id] ??= { matches: 0, minutes: 0, benchStarts: 0, keeper: 0 };
+      res[id].matches++;
+      res[id].minutes += min[id] || 0;
+      if (m.slots[0] && !m.slots[0].includes(id)) res[id].benchStarts++;
+      const kSlots = m.keeperBySlot?.filter((kid, i) => kid === id && m.slots[i]?.includes(id)) || [];
+      res[id].keeper += kSlots.length * m.interval;
+    });
+  });
+  return res;
+}
+
+function generate(m, hist) {
+  const c = cat(m);
+  const totalMin = c.block * c.blocks;
+  const numSlots = Math.round(totalMin / m.interval);
+  m.slots = [];
+  m.keeperBySlot = [];
+  m.pos ??= {};
+
+  // Keeper per slot bepalen
+  const slotsPerBlock = Math.round(c.block / m.interval);
+  for (let i = 0; i < numSlots; i++) {
+    const b = Math.min(Math.floor(i / slotsPerBlock), (c.blocks || 1) - 1);
+    m.keeperBySlot.push(m.keepers?.[b] || null);
+  }
+
+  const prevBench = {};
+  hist.forEach(h => {
+    h.present.forEach(id => {
+      prevBench[id] = (prevBench[id] || 0) + (h.slots[0] && !h.slots[0].includes(id) ? 1 : 0);
+    });
+  });
+
+  const benchCounts = {};
+  m.present.forEach(id => benchCounts[id] = 0);
+
+  for (let s = 0; s < numSlots; s++) {
+    const k = m.keeperBySlot[s];
+    const available = m.present.slice();
+    const on = [];
+    if (k && available.includes(k)) {
+      on.push(k);
+      available.splice(available.indexOf(k), 1);
+    }
+
+    const needed = c.field - on.length;
+    // Rangschikken wie op het veld moet
+    available.sort((a, b) => {
+      if (s === 0) {
+        return (prevBench[b] || 0) - (prevBench[a] || 0);
+      }
+      const benchDiff = benchCounts[b] - benchCounts[a];
+      if (benchDiff !== 0) return benchDiff;
+      // Vorige slot veld behouden voor continuïteit
+      const prevOn = m.slots[s - 1] || [];
+      return (prevOn.includes(b) ? 1 : 0) - (prevOn.includes(a) ? 1 : 0);
+    });
+
+    const chosen = available.slice(0, needed);
+    on.push(...chosen);
+    m.slots.push(on);
+
+    m.present.forEach(id => {
+      if (!on.includes(id)) benchCounts[id]++;
+    });
+  }
+}
+
+const KEY = 'wissels-jo9', PITCH_Y = 78;
+const KEEPER_POS = [50, 71], DEFAULT_POS = {
+  4: [[30, 55], [70, 55], [30, 22], [70, 22], [50, 40]],
+  6: [[25, 58], [75, 58], [50, 42], [28, 20], [72, 20], [50, 10]],
+  8: [[20, 58], [50, 60], [80, 58], [25, 36], [75, 36], [50, 28], [50, 10], [50, 46]],
+};
+let stored = localStorage.getItem(KEY), storageConflict = false;
+let db = JSON.parse(stored || '{"teams":[],"matches":[]}');
+if (db.players) {
+  const t = { id: 't' + Date.now().toString(36), name: 'Mijn team', players: db.players };
+  db = { teams: [t], team: t.id, matches: db.matches.map(m => ({ ...m, teamId: t.id,
+    keepers: [0, 1, 2, 3].map(q => m.keepers[q % m.keepers.length] ?? null) })) };
+}
+let cur = null, slot = 0, dragged = null;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const team = () => db.teams.find(t => t.id === db.team);
+const players = () => team()?.players ?? [];
+const name = id => db.teams.flatMap(t => t.players).find(p => p.id === id)?.name ?? '?';
+const match = () => db.matches.find(m => m.id === cur);
+const sorted = () => db.matches.filter(m => m.teamId === db.team).sort((a, b) => a.date.localeCompare(b.date));
+const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)); };
+
+const save = () => {
+  if (storageConflict) return false;
+  if (localStorage.getItem(KEY) !== stored) {
+    storageConflict = true;
+    alert('Een ander tabblad heeft de gegevens gewijzigd. We laden de nieuwste gegevens.');
+    window.location.reload();
+    return false;
+  }
+  const next = JSON.stringify(db);
+  localStorage.setItem(KEY, next);
+  stored = next;
+  return true;
+};
+const regen = m => { generate(m, history(m)); slot = 0; };
+const fmt = x => Number.isInteger(x) ? String(x) : `${Math.floor(x)}:${String(Math.round(x % 1 * 60)).padStart(2, '0')}`;
+const catOptions = sel => Object.entries(CATS).map(([k, c]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${c.label}</option>`).join('');
+
+function setCat(m, k) {
+  const c = CATS[k];
+  m.cat = k;
+  if (!intervals(c).includes(m.interval)) m.interval = intervals(c).find(Number.isInteger) ?? c.block;
+  m.keepers = Array.from({ length: c.keeper ? c.blocks : 0 }, (_, q) => m.keepers?.[q] ?? null);
+}
+
+function render() {
+  if (!save()) return;
+  $('#teamSel').innerHTML = db.teams.map(t =>
+    `<option value="${t.id}" ${t.id === db.team ? 'selected' : ''}>${esc(t.name)}</option>`).join('') || '<option>Nog geen team</option>';
+  document.querySelectorAll('.needTeam').forEach(s => s.hidden = !team());
+  $('#teamCat').innerHTML = catOptions(team()?.cat ?? 'JO9');
+  $('#players').innerHTML = players().map(p =>
+    `<span class="chip">${esc(p.name)}<button data-del="${p.id}" title="Verwijder speler">×</button></span>`).join('') || '<span style="color:var(--text-muted);font-size:0.9rem;">Nog geen spelers in dit team. Voeg spelers hieronder toe.</span>';
+  $('#matches').innerHTML = sorted().map(m =>
+    `<button class="${m.id === cur ? '' : 'alt'}" data-m="${m.id}">${esc(m.date)} ${esc(m.opponent || 'Geen tegenstander')}</button>`).join('') || '<span style="color:var(--text-muted);font-size:0.9rem;">Nog geen wedstrijden gepland.</span>';
+  renderStats();
+  const m = match();
+  $('#matchSec').hidden = $('#boardSec').hidden = !m;
+  if (m) { renderMatch(m); renderBoard(m); }
+  renderPrint(m);
+}
+
+function renderMatch(m) {
+  const c = cat(m);
+  $('#mDate').value = m.date; $('#mOpp').value = m.opponent;
+  $('#mInt').innerHTML = intervals(c).map(x => `<option value="${x}" ${x === m.interval ? 'selected' : ''}>${fmt(x)}</option>`).join('');
+  $('#mCat').textContent = `Spelvorm: ${c.label} (${c.field} spelers in het veld${c.keeper ? ', inclusief keeper' : ''})`;
+  $('#keeperHint').textContent = c.keeper
+    ? `Kies per kwart/blok van ${fmt(c.block)} min één keeper. Zonder selectie kiest het schema veldspelers.` : '';
+  $('#mPlayers').innerHTML = '<table><tr><th>Speler</th><th>Aanwezig</th>' +
+    m.keepers.map((_, q) => `<th>${q ? '' : 'Keeper '}${fmt(q * c.block)}'</th>`).join('') + '</tr>' +
+    players().map(p => { const here = m.present.includes(p.id);
+      return `<tr><td>${esc(p.name)}</td><td><input type="checkbox" data-present="${p.id}" ${here ? 'checked' : ''}></td>` +
+        m.keepers.map((k, q) => `<td><input type="checkbox" data-keeper="${p.id}" data-q="${q}" ${k === p.id ? 'checked' : ''} ${here ? '' : 'disabled'}></td>`).join('') + '</tr>';
+    }).join('') + '</table>';
+  $('#schedule').innerHTML = scheduleTable(m);
+  const first = m.slots[0] ? m.present.filter(id => !m.slots[0].includes(id)) : [];
+  $('#firstBench').textContent = first.length ? 'Eerste wissels (starten op de bank): ' + first.map(name).join(', ') : 'Iedereen start op het veld';
+}
+
+const legend = m => `<div class="legend"><span><i class="on">●</i> In het veld</span><span><i class="off">&nbsp;</i> Wisselbank</span>` +
+  `<span><i class="k">K</i> Doelman / Keeper</span><span><i class="bad">!</i> Aantal spelers wijkt af (moet ${cat(m).field} zijn)</span>` +
+  `<span>Tijdsaanduiding: startminuut van speelperiode</span></div>`;
+
+function scheduleTable(m) {
+  if (!m.slots.length) return '';
+  const min = minutes(m);
+  const head = m.slots.map((_, i) => `<th>${fmt(i * m.interval)}'</th>`).join('');
+  const rows = m.present.map(id => `<tr><td>${esc(name(id))}</td>` + m.slots.map((on, i) =>
+    m.keeperBySlot[i] === id ? '<td class="k">K</td>'
+      : `<td class="${on.includes(id) ? 'on' : 'off'}" data-cell="${i}" data-id="${id}">${on.includes(id) ? '●' : ''}</td>`).join('') +
+    `<td><strong>${fmt(min[id])}'</strong></td></tr>`).join('');
+  const count = '<tr class="count"><td>Op veld</td>' + m.slots.map(on =>
+    `<td class="${on.length === cat(m).field ? '' : 'bad'}">${on.length}</td>`).join('') + '<td></td></tr>';
+  return `<table><tr><th>Speler</th>${head}<th>Min</th></tr>${rows}${count}</table>` + legend(m);
+}
+
+function renderPrint(m) {
+  if (!m?.slots.length) { $('#printOut').innerHTML = ''; return; }
+  const list = ids => ids.map(name).join(', ') || '-';
+  const date = m.date ? new Date(m.date + 'T12:00').toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const on0 = m.slots[0], k0 = m.keeperBySlot[0];
+  const changes = m.slots.slice(1).map((on, j) => {
+    const prev = m.slots[j], i = j + 1, k = m.keeperBySlot[i];
+    const inn = on.filter(id => !prev.includes(id)), out = prev.filter(id => !on.includes(id));
+    if (!inn.length && !out.length && k === m.keeperBySlot[j]) return '';
+    return `<tr><td>${fmt(i * m.interval)}'</td><td>${esc(list(inn))}</td><td>${esc(list(out))}</td>` +
+      `<td>${k !== m.keeperBySlot[j] ? esc(k ? name(k) : 'geen keeper') : ''}</td></tr>`;
+  }).join('');
+  $('#printOut').innerHTML = `<h1>${esc(team()?.name ?? '')}${m.opponent ? ' tegen ' + esc(m.opponent) : ''}</h1>` +
+    `<p>${esc(date)} · ${cat(m).label} · Wissel elke ${fmt(m.interval)} min</p>` +
+    `<h2>Beginopstelling</h2><p><b>Keeper:</b> ${esc(k0 ? name(k0) : 'geen')}<br>` +
+    `<b>Veld:</b> ${esc(list(on0.filter(id => id !== k0)))}<br><b>Wissels:</b> ${esc(list(m.present.filter(id => !on0.includes(id))))}</p>` +
+    `<h2>Wisselschema</h2>${scheduleTable(m)}` +
+    (changes ? `<h2>Wisselmomenten</h2><table><tr><th>Minuut</th><th>Erin</th><th>Eruit</th><th>Nieuwe keeper</th></tr>${changes}</table>` : '');
+}
+
+function renderBoard(m) {
+  $('#slots').innerHTML = m.slots.map((_, i) =>
+    `<button class="slotbtn ${i === slot ? 'active' : 'alt'}" data-slot="${i}">${fmt(i * m.interval)}'</button>`).join('');
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  const on = m.slots[slot] || [], k = m.keeperBySlot[slot];
+  const bench = m.present.filter(id => !on.includes(id));
+  place(m, on, k);
+  const tokens = on.map(id => [id, id === k ? (m.pos.K || KEEPER_POS) : m.pos[id]])
+    .concat(bench.map((id, i) => {
+      const per = bench.length > 5 ? Math.ceil(bench.length / 2) : bench.length, row = Math.floor(i / per);
+      const n = Math.min(per, bench.length - row * per);
+      return [id, [(i % per + 1) * 100 / (n + 1), per < bench.length ? 85 + row * 9 : 89]];
+    }));
+  tokens.forEach(([id, [x, y]]) => {
+    const t = document.createElement('div');
+    t.className = 'token' + (id === k ? ' k' : '');
+    t.dataset.id = id; t.textContent = name(id);
+    t.style.left = x + '%'; t.style.top = y + '%';
+    $('#board').append(t);
+  });
+}
+
+function place(m, on, k) {
+  const near = (p, q) => Math.abs(p[0] - q[0]) < 12 && Math.abs(p[1] - q[1]) < 8;
+  const taken = k ? [m.pos.K || KEEPER_POS] : [], free = p => !taken.some(q => near(p, q));
+  const field = on.filter(id => id !== k).sort((a, b) => (b === dragged) - (a === dragged));
+  field.forEach(id => { if (m.pos[id] && free(m.pos[id])) taken.push(m.pos[id]); else delete m.pos[id]; });
+  field.filter(id => !m.pos[id]).forEach(id => {
+    const p = DEFAULT_POS[cat(m).field].find(free) || [50, 50];
+    taken.push(m.pos[id] = p.slice());
+  });
+  dragged = null;
+  save();
+}
+
+function renderStats() {
+  const s = stats(sorted());
+  $('#stats').innerHTML = '<table><tr><th>Speler</th><th>Wedstrijden</th><th>Speelminuten</th><th>Gem. / Wedstr</th><th>Start op bank</th><th>Keeper min</th></tr>' +
+    players().map(p => { const x = s[p.id] || { matches: 0, minutes: 0, benchStarts: 0, keeper: 0 };
+      return `<tr><td>${esc(p.name)}</td><td>${x.matches}</td><td>${fmt(x.minutes)}'</td><td>${x.matches ? Math.round(x.minutes / x.matches) + "'" : '-'}</td><td>${x.benchStarts}x</td><td>${fmt(x.keeper)}'</td></tr>`;
+    }).join('') + '</table>';
+}
+
+// Teams
+$('#addTeam').onsubmit = e => {
+  e.preventDefault();
+  const t = { id: 't' + Date.now().toString(36), name: $('#tname').value.trim(), cat: $('#tcat').value, players: [] };
+  db.teams.push(t); db.team = t.id; cur = null;
+  $('#tname').value = '';
+  render();
+};
+$('#teamSel').onchange = e => { db.team = e.target.value; cur = null; render(); };
+$('#teamCat').onchange = e => {
+  const k = e.target.value, old = sorted().filter(m => cat(m) !== CATS[k]);
+  team().cat = k;
+  if (old.length && confirm(`Ook bestaande wedstrijden (${old.length}) omzetten naar ${k}? De app maakt hun wisselschema’s opnieuw.`))
+    old.forEach(m => { setCat(m, k); generate(m, history(m)); });
+  render();
+};
+$('#delTeam').onclick = () => {
+  if (!team() || !confirm(`Team ${team().name} met alle wedstrijden verwijderen?`)) return;
+  db.matches = db.matches.filter(m => m.teamId !== db.team);
+  db.teams = db.teams.filter(t => t.id !== db.team);
+  db.team = db.teams[0]?.id; cur = null;
+  render();
+};
+
+// Spelers
+$('#addPlayer').onsubmit = e => {
+  e.preventDefault();
+  team().players.push({ id: Date.now().toString(36), name: $('#pname').value.trim() });
+  $('#pname').value = '';
+  render();
+};
+$('#players').onclick = e => {
+  const id = e.target.dataset.del;
+  if (id && confirm(`${name(id)} verwijderen?`)) { team().players = players().filter(p => p.id !== id); render(); }
+};
+
+// Wedstrijden
+$('#newMatch').onclick = () => {
+  const baseId = Date.now().toString(36);
+  let id = baseId, suffix = 1;
+  while (db.matches.some(m => m.id === id)) id = `${baseId}-${suffix++}`;
+  const m = { id, teamId: db.team, date: new Date().toISOString().slice(0, 10), opponent: '',
+              present: players().map(p => p.id), slots: [], keeperBySlot: [], pos: {} };
+  setCat(m, team().cat ?? 'JO9');
+  db.matches.push(m); cur = m.id; regen(m); render();
+};
+$('#matches').onclick = e => { if (e.target.dataset.m) { cur = e.target.dataset.m; slot = 0; render(); } };
+$('#delMatch').onclick = () => {
+  if (confirm('Wedstrijd verwijderen?')) { db.matches = db.matches.filter(m => m.id !== cur); cur = null; render(); }
+};
+$('#gen').onclick = () => { regen(match()); render(); };
+$('#printBtn').onclick = () => window.print();
+$('#mDate').oninput = e => { match().date = e.target.value; save(); };
+$('#mOpp').oninput = e => { match().opponent = e.target.value; save(); };
+$('#mDate').onchange = e => { match().date = e.target.value; render(); };
+$('#mOpp').onchange = e => { match().opponent = e.target.value; render(); };
+$('#mInt').onchange = e => { const m = match(); m.interval = +e.target.value; regen(m); render(); };
+$('#matchSec').onchange = e => {
+  const m = match(), t = e.target;
+  if (t.dataset.present) m.present = t.checked ? m.present.concat(t.dataset.present) : m.present.filter(x => x !== t.dataset.present);
+  else if (t.dataset.keeper) m.keepers[t.dataset.q] = t.checked ? t.dataset.keeper : null;
+  else return;
+  m.keepers = m.keepers.map(k => m.present.includes(k) ? k : null);
+  regen(m); render();
+};
+$('#schedule').onclick = e => {
+  const c = e.target.dataset.cell; if (c === undefined) return;
+  const m = match(), id = e.target.dataset.id;
+  m.slots[c] = m.slots[c].includes(id) ? m.slots[c].filter(x => x !== id) : m.slots[c].concat(id);
+  render();
+};
+
+// Back-up
+$('#export').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
+  a.download = `wissels-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$('#importBtn').onclick = () => $('#import').click();
+$('#import').onchange = async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); } catch { data = null; }
+  if (!Array.isArray(data?.teams) || !Array.isArray(data?.matches)) { alert('Dit is geen geldig back-upbestand.'); return; }
+  if (!confirm(`Deze back-up terugzetten? Aantal teams: ${data.teams.length}. Aantal wedstrijden: ${data.matches.length}. Dit vervangt alle huidige teams en wedstrijden.`)) return;
+  db = data; db.team ??= db.teams[0]?.id; cur = null;
+  render();
+};
+
+// Drag & drop op veld
+$('#slots').onclick = e => { if (e.target.dataset.slot) { slot = +e.target.dataset.slot; render(); } };
+$('#board').onpointerdown = e => {
+  const t = e.target.closest('.token'); if (!t) return;
+  t.setPointerCapture(e.pointerId);
+  const r = $('#board').getBoundingClientRect(), clamp = v => Math.min(97, Math.max(3, v));
+  const dx = e.clientX - r.left - parseFloat(t.style.left) / 100 * r.width, dy = e.clientY - r.top - parseFloat(t.style.top) / 100 * r.height;
+  t.onpointermove = ev => {
+    t.style.left = clamp((ev.clientX - dx - r.left) / r.width * 100) + '%';
+    t.style.top = clamp((ev.clientY - dy - r.top) / r.height * 100) + '%';
+  };
+  t.onpointercancel = () => { t.onpointermove = t.onpointerup = t.onpointercancel = null; render(); };
+  t.onpointerup = () => {
+    t.onpointermove = t.onpointerup = t.onpointercancel = null;
+    const m = match(), id = t.dataset.id, x = parseFloat(t.style.left), y = parseFloat(t.style.top), toField = y < PITCH_Y;
+    if (id === m.keeperBySlot[slot]) { if (toField) m.pos.K = [x, y]; }
+    else if (toField) { if (!m.slots[slot].includes(id)) m.slots[slot].push(id); m.pos[id] = [x, y]; dragged = id; }
+    else { m.slots[slot] = m.slots[slot].filter(p => p !== id); delete m.pos[id]; }
+    render();
+  };
+};
+
+// Demo initiële data indien leeg zodat het scherm direct rijk en levendig toont
+if (db.teams.length === 0) {
+  const teamDemoId = 't-demo-jo9';
+  const demoPlayers = [
+    { id: 'p1', name: 'Milan' },
+    { id: 'p2', name: 'Sem' },
+    { id: 'p3', name: 'Lucas' },
+    { id: 'p4', name: 'Levi' },
+    { id: 'p5', name: 'Finn' },
+    { id: 'p6', name: 'Noah' },
+    { id: 'p7', name: 'Daan' },
+    { id: 'p8', name: 'Bram' }
+  ];
+  db.teams.push({ id: teamDemoId, name: 'JO9-1 (Oranje)', cat: 'JO9', players: demoPlayers });
+  db.team = teamDemoId;
+  const matchDemo = {
+    id: 'm-demo-1',
+    teamId: teamDemoId,
+    date: new Date().toISOString().slice(0, 10),
+    opponent: 'VV De Valken JO9-2',
+    present: demoPlayers.map(p => p.id),
+    slots: [],
+    keeperBySlot: [],
+    pos: {}
+  };
+  setCat(matchDemo, 'JO9');
+  db.matches.push(matchDemo);
+  cur = matchDemo.id;
+  regen(matchDemo);
+}
+
+$('#tcat').innerHTML = catOptions('JO9');
+render();
+</script>
+</body>
+</html>

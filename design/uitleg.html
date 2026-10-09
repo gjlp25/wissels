@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uitleg & Handleiding · Wisselschema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #006948;
+    --primary-hover: #005439;
+    --primary-container: #e8f5ed;
+    --primary-light: #f0fdf4;
+    --secondary: #006398;
+    --accent-amber: #d97706;
+    --amber-soft: #fef3c7;
+    --surface: #faf8ff;
+    --surface-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 5rem;
+  }
+
+  /* Header Bar */
+  header.top-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .header-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0.875rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    background: #006948;
+    color: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-back:hover {
+    background: #f8fafc;
+    border-color: var(--border-hover);
+    color: var(--primary);
+  }
+
+  /* Main Container */
+  .container {
+    max-width: 1040px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Hero Intro Card */
+  .hero-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #006948 0%, #059669 50%, #10b981 100%);
+  }
+  .hero-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hero-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    max-width: 800px;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Quick Navigation Chips */
+  .nav-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+  }
+  .nav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 9999px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.825rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .nav-chip:hover {
+    background: var(--primary-container);
+    border-color: #a7f3d0;
+    color: var(--primary);
+  }
+  .chip-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: #e2e8f0;
+    color: var(--text-primary);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .nav-chip:hover .chip-num {
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  /* Notice / Alert Box */
+  .alert-card {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 5px solid #d97706;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .alert-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: #b45309;
+    margin-top: 2px;
+  }
+  .alert-content h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 0.35rem;
+  }
+  .alert-content p {
+    font-size: 0.9rem;
+    color: #78350f;
+    line-height: 1.55;
+  }
+  .alert-content a {
+    color: #92400e;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Step Sections */
+  .steps-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+  .step-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    scroll-margin-top: 5rem;
+    transition: border-color 0.15s ease;
+  }
+  .step-card:hover {
+    border-color: #cbd5e1;
+  }
+  .step-header {
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .step-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .step-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #006948;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .step-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .step-body {
+    padding: 1.5rem;
+  }
+
+  /* Ordered list styling */
+  .step-instructions {
+    list-style: none;
+    counter-reset: step-counter;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .step-instructions li {
+    counter-increment: step-counter;
+    display: flex;
+    gap: 0.85rem;
+    font-size: 0.925rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .step-instructions li::before {
+    content: counter(step-counter);
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .step-instructions li strong {
+    color: var(--text-primary);
+  }
+
+  /* Interactive / Visual Blueprint Previews */
+  .preview-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .preview-caption {
+    margin-top: 0.75rem;
+    font-size: 0.825rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* Blueprint Components */
+  .mini-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    background: #ffffff;
+    padding: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .mini-input {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    background: #fff;
+  }
+  .mini-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: default;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .mini-btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .mini-btn-outline {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .mini-btn-danger {
+    background: #fff;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+  }
+
+  /* Mini Chip list */
+  .mini-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: #fff;
+    padding: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .mini-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .mini-chip .remove {
+    color: #94a3b8;
+    cursor: default;
+    font-weight: 700;
+  }
+
+  /* Mini Schedule Table */
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .mini-table th, .mini-table td {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  .mini-table th:first-child, .mini-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    background: #f8fafc;
+  }
+  .mini-table th {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+  .cell-on {
+    background: #c8ebd0;
+    color: #065f46;
+    font-weight: 700;
+  }
+  .cell-off {
+    background: #f8fafc;
+    color: #94a3b8;
+  }
+  .cell-keeper {
+    background: #fef08a;
+    color: #854d0e;
+    font-weight: 700;
+  }
+
+  /* Tactical Pitch Mini Visualization */
+  .mini-pitch-container {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+  }
+  .mini-pitch {
+    width: 200px;
+    height: 140px;
+    background: #065f46;
+    border-radius: 6px;
+    position: relative;
+    border: 2px solid #fff;
+    overflow: hidden;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.2);
+  }
+  .mini-pitch .mid-line {
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    border-top: 1.5px solid rgba(255,255,255,0.7);
+  }
+  .mini-pitch .mid-circle {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px; height: 44px;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+  }
+  .mini-pitch .box-top {
+    position: absolute;
+    top: 0; left: 30%; right: 30%;
+    height: 24px;
+    border-bottom: 1.5px solid rgba(255,255,255,0.7);
+    border-left: 1.5px solid rgba(255,255,255,0.7);
+    border-right: 1.5px solid rgba(255,255,255,0.7);
+  }
+  .mini-pitch .box-bottom {
+    position: absolute;
+    bottom: 0; left: 30%; right: 30%;
+    height: 24px;
+    border-top: 1.5px solid rgba(255,255,255,0.7);
+    border-left: 1.5px solid rgba(255,255,255,0.7);
+    border-right: 1.5px solid rgba(255,255,255,0.7);
+  }
+  .mini-token {
+    position: absolute;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #0284c7;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .mini-token.keeper {
+    background: #e8a400;
+  }
+  .pitch-features {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pitch-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .feature-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  /* Privacy FAQ section */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .faq-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #f8fafc;
+  }
+  .faq-q {
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .faq-a {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  /* Footer */
+  footer.page-footer {
+    max-width: 1040px;
+    margin: 3rem auto 0;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 0 1rem; margin-top: 1rem; }
+    .header-inner { padding: 0.75rem 1rem; }
+    .hero-card { padding: 1.25rem; }
+    .step-header { padding: 1rem 1.25rem; }
+    .step-body { padding: 1.25rem; }
+    .mini-form-row { flex-direction: column; align-items: stretch; }
+    .mini-pitch-container { flex-direction: column; align-items: flex-start; }
+    footer.page-footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">Wisselschema</div>
+        <div class="brand-subtitle">KNVB Fair-Play Wedstrijddienst · Handleiding & Uitleg</div>
+      </div>
+    </div>
+    <a href="index.html" class="btn-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Terug naar Wisselschema
+    </a>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Hero Header -->
+  <div class="hero-card">
+    <h1 class="hero-title">
+      Uitleg: Je eerste wisselschema
+    </h1>
+    <p class="hero-subtitle">
+      Maak eenvoudig een team aan, beheer spelers, en bereid eerlijke wedstrijden voor volgens de officiële KNVB Fair-Play richtlijnen voor de jeugd (JO7 t/m JO12). Volg het stappenplan hieronder om direct aan de slag te gaan.
+    </p>
+
+    <!-- Quick Navigation Chips -->
+    <nav class="nav-chips" aria-label="Snelnavigatie door stappen">
+      <a href="#stap-1" class="nav-chip"><span class="chip-num">1</span> Team & Categorie</a>
+      <a href="#stap-2" class="nav-chip"><span class="chip-num">2</span> Spelers toevoegen</a>
+      <a href="#stap-3" class="nav-chip"><span class="chip-num">3</span> Wedstrijd voorbereiden</a>
+      <a href="#stap-4" class="nav-chip"><span class="chip-num">4</span> Schema & Wissels</a>
+      <a href="#stap-5" class="nav-chip"><span class="chip-num">5</span> Interactieve Opstelling</a>
+      <a href="#stap-6" class="nav-chip"><span class="chip-num">6</span> Totalen & PDF Export</a>
+      <a href="#stap-7" class="nav-chip"><span class="chip-num">7</span> Back-up & Privacy</a>
+    </nav>
+  </div>
+
+  <!-- Alert Warning Box -->
+  <aside class="alert-card" aria-labelledby="bewaren">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+    <div class="alert-content">
+      <h2 id="bewaren">Belangrijk: Bewaar en bescherm je gegevens</h2>
+      <p>
+        Je gegevens worden veilig en lokaal in <strong>deze browser</strong> bewaard, niet op een externe server of account. <strong>Download regelmatig een JSON back-up</strong>, in het bijzonder voordat je browsergegevens wist of van apparaat wisselt. Terugzetten vervangt alle huidige lokale data. Lees <a href="#stap-7">stap 7 voor uitgebreide privacy- en opslagtips</a>.
+      </p>
+    </div>
+  </aside>
+
+  <!-- Steps List -->
+  <div class="steps-grid">
+
+    <!-- Stap 1 -->
+    <section id="stap-1" class="step-card">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge">1</div>
+          <h2 class="step-title">Maak een team en kies de categorie</h2>
+        </div>
+        <span class="step-tag">Basisinstelling</span>
+      </div>
+      <div class="step-body">
+        <ol class="step-instructions">
+          <li>Typ de gewenste teamnaam bij <strong>Nieuw team</strong> (bijvoorbeeld <em>JO9-1 Oranje</em>).</li>
+          <li>Kies de bijbehorende leeftijdscategorie (zoals <strong>Onder 9 (6v6)</strong>) en klik op <strong>+ Team aanmaken</strong>. De categorie bepaalt automatisch het aantal veldspelers, totale speeltijd en keeperblokken.</li>
+          <li>Het team verschijnt in het keuzemenu bovenaan. Je kunt altijd schakelen tussen meerdere teams of later de categorie aanpassen.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Voorbeeld weergave · Teamselectie</div>
+          <div class="mini-form-row">
+            <input class="mini-input" value="JO9-1 (Oranje)" readonly style="width: 140px; font-weight: 600;">
+            <select class="mini-input" style="background:#fff;"><option>Onder 9 (6v6)</option></select>
+            <button class="mini-btn mini-btn-danger">Verwijder team</button>
+            <div style="flex-grow:1; display:flex; justify-content:flex-end; gap:0.5rem;">
+              <input class="mini-input" placeholder="Nieuw team, bv. JO9-2" style="width: 160px;">
+              <button class="mini-btn mini-btn-primary">+ Team aanmaken</button>
+            </div>
+          </div>
+          <div class="preview-caption">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Bovenaan selecteer je het actieve team; onderaan voeg je eenvoudig nieuwe jeugdteams toe.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stap 2 -->
+    <section id="stap-2" class="step-card">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge">2</div>
+          <h2 class="step-title">Voeg je spelers toe</h2>
+        </div>
+        <span class="step-tag">Selectie</span>
+      </div>
+      <div class="step-body">
+        <ol class="step-instructions">
+          <li>Voer de voornaam van een speler in bij <strong>Naam speler</strong> en klik op <strong>+ Speler toevoegen</strong>. Gebruik bij voorkeur herkenbare, korte voornamen.</li>
+          <li>Herhaal dit tot de selectie compleet is. Alle ingevoerde spelers verschijnen als interactieve chips bovenaan.</li>
+          <li>Met het kruisje (<strong>×</strong>) naast een naam kun je een speler na bevestiging uit het team verwijderen.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Voorbeeld weergave · Spelerslijst</div>
+          <div class="mini-chips">
+            <span class="mini-chip">Milan <span class="remove">×</span></span>
+            <span class="mini-chip">Sem <span class="remove">×</span></span>
+            <span class="mini-chip">Lucas <span class="remove">×</span></span>
+            <span class="mini-chip">Levi <span class="remove">×</span></span>
+            <span class="mini-chip">Finn <span class="remove">×</span></span>
+            <span class="mini-chip">Noah <span class="remove">×</span></span>
+            <span class="mini-chip">Daan <span class="remove">×</span></span>
+            <span class="mini-chip">Bram <span class="remove">×</span></span>
+          </div>
+          <div class="mini-form-row" style="margin-top: 0.5rem;">
+            <input class="mini-input" placeholder="Naam speler..." style="width: 200px;">
+            <button class="mini-btn mini-btn-primary">+ Speler toevoegen</button>
+          </div>
+          <div class="preview-caption">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Alle spelers blijven bewaard voor toekomstige wedstrijden van dit team.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stap 3 -->
+    <section id="stap-3" class="step-card">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge">3</div>
+          <h2 class="step-title">Bereid een wedstrijd voor</h2>
+        </div>
+        <span class="step-tag">Aanwezigheid & Keepers</span>
+      </div>
+      <div class="step-body">
+        <p style="font-size:0.925rem; color:var(--text-secondary); margin-bottom:1rem;">
+          Klik onder <strong>Wedstrijden</strong> op <strong>+ Nieuwe wedstrijd</strong>. De app maakt direct een concept aan op basis van de huidige datum.
+        </p>
+        <ol class="step-instructions">
+          <li>Controleer de speeldatum en noteer de naam van de tegenstander.</li>
+          <li>Kies het wisselinterval bij <strong>Wissel elke … min</strong> (bijvoorbeeld elke 5 minuten).</li>
+          <li>Vink bij <strong>Aanwezig</strong> alle spelers aan die meedoen. Afwezige spelers worden automatisch uitgesloten van het schema.</li>
+          <li>Wijs bij categorieën met doelman voor elk kwartblok van de wedstrijd een keeper aan. Per blok kan er maximaal één keeper zijn.</li>
+          <li>Klik op <strong>⚡ Nieuw wisselvoorstel</strong> om een evenwichtig en eerlijk speelschema te genereren.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Voorbeeld weergave · Aanwezigheid & Keepers</div>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Speler</th>
+                <th>Aanwezig</th>
+                <th>Keeper 0'</th>
+                <th>Keeper 10'</th>
+                <th>Keeper 20'</th>
+                <th>Keeper 30'</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Milan</td>
+                <td><input type="checkbox" checked disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" disabled></td>
+              </tr>
+              <tr>
+                <td>Sem</td>
+                <td><input type="checkbox" checked disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" checked disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" disabled></td>
+              </tr>
+              <tr>
+                <td>Lucas</td>
+                <td><input type="checkbox" checked disabled></td>
+                <td><input type="checkbox" checked disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" disabled></td>
+                <td><input type="checkbox" disabled></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="preview-caption">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Het systeem zorgt dat keepende spelers niet dubbel als veldspeler worden ingeroosterd.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stap 4 -->
+    <section id="stap-4" class="step-card">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge">4</div>
+          <h2 class="step-title">Lees en controleer het schema</h2>
+        </div>
+        <span class="step-tag">Eerlijke Speeltijd</span>
+      </div>
+      <div class="step-body">
+        <ol class="step-instructions">
+          <li>De kolommen (<strong>0′, 5′, 10′…</strong>) geven de startminuut van elke speelperiode aan. De kolom <strong>Min</strong> toont de totale speelminuten per speler.</li>
+          <li><strong>Groen met ●</strong> betekent dat de speler in het veld staat; een <strong>wit/grijs vakje</strong> betekent wisselbank; <strong>geel met K</strong> markeert de keeper.</li>
+          <li><strong>Directe correcties</strong>: Klik op een groen of grijs vakje om een speler handmatig in of uit te wisselen.</li>
+          <li>Houd de onderste rij <strong>Op veld</strong> in de gaten. Een rood cijfer geeft aan dat er te veel of te weinig spelers op het veld staan. Wissel altijd één speler erin én één eruit.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Voorbeeld weergave · Wisseltabel met statusindicator</div>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Speler</th>
+                <th>0'</th>
+                <th>5'</th>
+                <th>10'</th>
+                <th>15'</th>
+                <th>20'</th>
+                <th>25'</th>
+                <th>Totaal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Milan</td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td class="cell-off"></td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td><strong>25'</strong></td>
+              </tr>
+              <tr>
+                <td>Lucas (K)</td>
+                <td class="cell-keeper">K</td>
+                <td class="cell-keeper">K</td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td class="cell-off"></td>
+                <td class="cell-on">●</td>
+                <td><strong>25'</strong></td>
+              </tr>
+              <tr>
+                <td>Daan</td>
+                <td class="cell-off"></td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td class="cell-on">●</td>
+                <td class="cell-off"></td>
+                <td><strong>20'</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display:flex; gap:1.25rem; font-size:0.8rem; margin-top:0.75rem; color:var(--text-secondary); flex-wrap:wrap;">
+            <span><strong style="color:#065f46">● Groen</strong> = In het veld</span>
+            <span><strong style="color:#94a3b8">Wit</strong> = Wisselbank</span>
+            <span><strong style="color:#b45309">K Geel</strong> = Doelman</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stap 5 -->
+    <section id="stap-5" class="step-card">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge">5</div>
+          <h2 class="step-title">Bekijk en wijzig de opstelling</h2>
+        </div>
+        <span class="step-tag">Tactisch Bord</span>
+      </div>
+      <div class="step-body">
+        <ol class="step-instructions">
+          <li>Selecteer met de periodeknoppen (<strong>0′, 5′, 10′…</strong>) welk tijdvak je wilt bekijken op het veld.</li>
+          <li>Sleep spelers naar een logische positie (spits, middenveld, verdediging). Posities blijven bewaard voor de rest van de wedstrijd.</li>
+          <li><strong>Direct wisselen op het veld</strong>: Sleep een speler van het veld naar de grijze <em>Wisselbank</em> onderaan (of andersom) om realtime een wissel door te voeren in het schema.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Voorbeeld weergave · Tactisch veld & Wisselbank</div>
+          <div class="mini-pitch-container">
+            <div class="mini-pitch">
+              <div class="mid-line"></div>
+              <div class="mid-circle"></div>
+              <div class="box-top"></div>
+              <div class="box-bottom"></div>
+              <!-- Tokens -->
+              <div class="mini-token keeper" style="left: calc(50% - 11px); bottom: 10px;">K</div>
+              <div class="mini-token" style="left: calc(25% - 11px); bottom: 42px;">2</div>
+              <div class="mini-token" style="left: calc(75% - 11px); bottom: 42px;">3</div>
+              <div class="mini-token" style="left: calc(50% - 11px); top: 52px;">6</div>
+              <div class="mini-token" style="left: calc(30% - 11px); top: 22px;">7</div>
+              <div class="mini-token" style="left: calc(70% - 11px); top: 22px;">9</div>
+            </div>
+            <div class="pitch-features">
+              <div class="pitch-feature-item">
+                <span class="feature-dot"></span>
+                <span><strong>Drag & Drop</strong>: Versleep spelers direct met je vinger of muis.</span>
+              </div>
+              <div class="pitch-feature-item">
+                <span class="feature-dot"></span>
+                <span><strong>Gele token</strong> = Aangewezen keeper (veilig op vaste doelpostpositie).</span>
+              </div>
+              <div class="pitch-feature-item">
+                <span class="feature-dot"></span>
+                <span><strong>Onderste bankstrook</strong> = Wisselspelers voor deze actieve periode.</span>
+              </div>
+            </div>
+          </div>
+          <div class="preview-caption">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Het verplaatsen van spelers op het veld wijzigt de posities, slepen naar de bank past direct de speelminuten aan.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stap 6 -->
+    <section id="stap-6" class="step-card">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge">6</div>
+          <h2 class="step-title">Bekijk seizoentotalen en print of bewaar als PDF</h2>
+        </div>
+        <span class="step-tag">Statistieken & Print</span>
+      </div>
+      <div class="step-body">
+        <ol class="step-instructions">
+          <li>Onder <strong>Seizoentotalen & Eerlijke Speeltijd</strong> zie je per speler het aantal gespeelde wedstrijden, gemiddelde speelminuten en hoe vaak iemand startte op de wisselbank.</li>
+          <li>Klik boven het schema op <strong>🖨️ Printen / PDF</strong>. Er opent direct een geoptimaliseerde printversie van het wedstrijdrooster.</li>
+          <li>Kies in de printerdialoog van je browser voor <em>Opslaan als PDF</em> of stuur het rechtstreeks naar je printer om mee te nemen langs het veld.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Voorbeeld weergave · Seizoensstatistieken</div>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Speler</th>
+                <th>Wedstrijden</th>
+                <th>Speelminuten</th>
+                <th>Gem. / Wedstr</th>
+                <th>Start op bank</th>
+                <th>Keeper min</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Milan</td>
+                <td>1</td>
+                <td>30'</td>
+                <td>30'</td>
+                <td>0x</td>
+                <td>0'</td>
+              </tr>
+              <tr>
+                <td>Lucas</td>
+                <td>1</td>
+                <td>30'</td>
+                <td>30'</td>
+                <td>0x</td>
+                <td>10'</td>
+              </tr>
+              <tr>
+                <td>Daan</td>
+                <td>1</td>
+                <td>30'</td>
+                <td>30'</td>
+                <td>1x</td>
+                <td>0'</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="preview-caption">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Statistieken worden realtime herberekend zodra je wijzigingen opslaat in het schema.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stap 7 -->
+    <section id="stap-7" class="step-card" style="border-left: 4px solid #006948;">
+      <div class="step-header">
+        <div class="step-title-group">
+          <div class="step-badge" style="background: #006948;">7</div>
+          <h2 class="step-title">Back-ups, privacy en gegevensbeheer</h2>
+        </div>
+        <span class="step-tag" style="background:#e8f5ed; color:#006948;">Opslag & Privacy</span>
+      </div>
+      <div class="step-body">
+        <ol class="step-instructions">
+          <li><strong>Back-up downloaden</strong>: Klik onderaan de app op <em>📥 Back-up downloaden (JSON)</em>. Dit bewaart al je teams, spelers en opgeslagen wedstrijdschema's veilig in één compact bestand.</li>
+          <li><strong>Back-up terugzetten</strong>: Op een andere telefoon, tablet of computer klik je op <em>📂 Back-up terugzetten</em> om je JSON-bestand in te laden. Dit vervangt de lokale data op dat apparaat.</li>
+        </ol>
+
+        <div class="preview-box">
+          <div class="preview-header">Veelgestelde vragen & Privacygarantie</div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-q">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Waar worden mijn spelersgegevens opgeslagen?
+              </div>
+              <div class="faq-a">
+                Alle gegevens blijven 100% lokaal in je browser (via <code>localStorage</code>). Er worden geen namen, teams of schema's naar externe cloudservers gestuurd.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Wat gebeurt er als ik mijn browsergeschiedenis wis?
+              </div>
+              <div class="faq-a">
+                Als je de browsercache of website-opslag leegt, of een incognitovenster sluit, kunnen lokale gegevens gewist worden. Maak daarom altijd voor de zekerheid een JSON back-up.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Is een geprinte PDF een back-up?
+              </div>
+              <div class="faq-a">
+                Nee, een PDF is uitsluitend bedoeld om mee te nemen naar het veld of te delen met ouders. Alleen een JSON-bestand kan weer actief worden geïmporteerd in de app.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<footer class="page-footer">
+  <div class="footer-text">
+    <strong>KNVB Fair-Play Wedstrijddienst</strong> · Ontworpen voor leiders, coaches en jeugdbegeleiders in het amateurvoetbal.
+  </div>
+  <a href="index.html" class="btn-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Terug naar Wisselschema
+  </a>
+</footer>
+
+</body>
+</html>
