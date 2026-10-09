@@ -51,7 +51,7 @@ Gebruik onderaan de app **Back-up downloaden** om alles als JSON-bestand op te s
 ## Tests
 
 ```sh
-node schedule.test.js
+node --test
 ```
 
-Print `ok` als alles slaagt.
+Runs the full generator, persistence, matchday, import and static-delivery suites. See `docs/matchday-improvements.md` for acceptance/compatibility decisions and `scripts/verify-matchday.py` for real-browser verification (external Playwright tooling required).

@@ -1,4 +1,4 @@
-"""Refresh seven manual images from real interactions with fictional local data.
+"""Refresh eight manual images from real interactions with fictional local data.
 
 Requires Playwright and Pillow in a separate tooling environment, not in the app.
 """
@@ -40,6 +40,7 @@ try:
         context.route('**/*', route)
         page = context.new_page()
         page.on('pageerror', lambda e: errors.append(str(e)))
+        page.on('dialog', lambda d: d.accept())
         page.goto(base + '/index.html')
         def shot(filename, selector, targets):
             region = page.locator(selector)
@@ -80,6 +81,7 @@ try:
         for q in range(4):
             page.locator(f'[data-keeper][data-q="{q}"]').nth(q).check()
         page.click('#gen')
+        page.select_option('#mStatus', 'ready')
         shot('03-wedstrijd.png', '#matchSec', [(1, '#mDate'), (2, '#mPlayers'), (3, '#keeperHint'), (4, '#gen')])
         cell = page.locator('#schedule td.on').first
         col = cell.get_attribute('data-cell')
@@ -98,11 +100,16 @@ try:
         page.mouse.up()
         assert page.locator('.token:not(.k)').first.get_attribute('style') != before
         shot('05-opstelling.png', '#boardSec', [(1, '#slots'), (2, '#pitch'), (3, '#bench')])
+        page.click('#matchModeBtn')
+        page.click('#modeForward')
+        shot('08-wedstrijdmodus.png', '#modeSec', [(1, '#modeCurrent'), (2, '#modeNext'), (3, '#modeForward')])
+        page.click('#modeClose')
+        page.select_option('#mStatus', 'played')
         shot('06-totalen.png', 'section:has(#stats)', [(1, '#stats th:nth-child(3)'), (2, '#stats th:nth-child(5)')])
         shot('07-backup.png', 'section:has(#export)', [(1, '#export'), (2, '#importBtn')])
         assert not errors and not external, (errors, external)
         images = sorted(args.output.glob('*.png'))
-        assert len(images) == 7
+        assert len(images) == 8
         hashes = {x.name: hashlib.sha256(x.read_bytes()).hexdigest() for x in images}
         (args.output / 'capture-results.json').write_text(json.dumps({'hashes': hashes, 'page_errors': errors, 'external_requests': external}, indent=2))
         print(json.dumps(hashes, indent=2))
