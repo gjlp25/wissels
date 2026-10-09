@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { CATS, generate } = require('./schedule');
 const ids = n => Array.from({ length: n }, (_, i) => `p${i}`);
-const match = (n, cat = 'JO9', half = false, keepers = []) => ({ cat, present: ids(n), interval: CATS[cat].block / (half ? 2 : 1), keepers, slots: [], keeperBySlot: [] });
+const match = (n, cat = 'JO9', half = false, keepers = []) => ({ status: 'played', cat, present: ids(n), interval: CATS[cat].block / (half ? 2 : 1), keepers, slots: [], keeperBySlot: [] });
 const repeats = m => m.slots.slice(1).reduce((sum, on, i) => sum + m.present.filter(id => !on.includes(id) && !m.slots[i].includes(id)).length, 0);
 function valid(m) {
   for (const [i, on] of m.slots.entries()) {

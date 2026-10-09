@@ -19,7 +19,7 @@ test('manual provides Dutch numbered steps, privacy and replacement warning', ()
 test('every instructional image is local, described and opens larger', () => {
   const html = read('uitleg.html');
   const images = [...html.matchAll(/<a href="(assets\/manual\/[^\"]+\.png)"[^>]*>\s*<img src="([^"]+)" alt="([^"]+)"/g)];
-  assert.equal(images.length, 7);
+  assert.equal(images.length, 8);
   for (const [, href, src, alt] of images) {
     assert.equal(href, src);
     assert.ok(alt.length > 30);

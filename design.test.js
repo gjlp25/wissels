@@ -2,9 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const crypto = require('node:crypto');
 const read = path => fs.readFileSync(path, 'utf8');
-const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 
 test('app and manual share the approved local green design tokens', () => {
   for (const file of ['index.html', 'uitleg.html']) {
@@ -44,8 +42,11 @@ test('creator footers preserve manual return navigation and app print isolation'
   assert.match(manual, /header, footer, \.contents \{ display: none \}/);
 });
 
-test('visual refactor preserves the exact production scheduling and DOM scripts', () => {
-  assert.equal(hash(read('index.html').match(/<script>([\s\S]*?)<\/script>/)[1]), '080f82e3c31c8cb00c71fbd2ed94c36b3e4b5d9619a5edb54fc9475c7db973cd');
-  assert.equal(hash(fs.readFileSync('schedule.js')), '41094cfd5f553df63f2cfa4ec21694c81ba440c9ed37821d63062ca05340c2e2');
+// The approved behavioral enhancements supersede the old visual-only frozen script hashes.
+// Real scheduling/storage contracts remain covered by the generator and handler suites.
+test('production scripts remain local, loaded in order and included in Docker', () => {
   assert.match(read('index.html'), /<script src="schedule.js"><\/script>\s*<script>/);
+  assert.equal((read('index.html').match(/<script/g) || []).length, 2);
+  assert.match(read('Dockerfile'), /COPY index.html schedule.js uitleg.html/);
+  assert.match(read('schedule.js'), /module.exports/);
 });

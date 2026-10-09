@@ -49,7 +49,7 @@
     header { gap: .75rem; padding-bottom: 1rem; margin-bottom: 1rem }
   }
   /* Scroll only the data tables; field tokens may extend beyond the board. */
-  #mPlayers, #schedule, #stats { overflow-x: auto; max-width: 100%; margin: .75rem 0; padding-bottom: .2rem }
+  #mPlayers, #schedule, #stats, #fairnessData { overflow-x: auto; max-width: 100%; margin: .75rem 0; padding-bottom: .2rem }
   .app-header .brand { flex: 1 1 18rem }
   section > h2 { border-left: 4px solid var(--primary); padding-left: .65rem }
   #delTeam, #delMatch { background: #fff; border-color: #e59b9b; color: var(--error) }
@@ -96,6 +96,11 @@
   .token.k { background: #f6bd34; color: #382600; border-color: #fff4b8 }
   .slotbtn { border-radius: 999px; font-size: .8rem; min-height: 36px; padding: .4rem .75rem }
   .slotbtn.active { background: var(--primary-hover); border-color: var(--primary-hover) }
+  #schedule select { width: 5rem; min-width: 0; font-size: .85rem; padding: .3rem 0 }
+  #modeSec { border: 2px solid var(--primary); scroll-margin-top: .75rem }
+  #modeCurrent { font-size: 1.2rem; font-weight: 700 }
+  #modeSec p { overflow-wrap: anywhere }
+  #modeSec button { min-height: 48px }
   #printOut { display: none }
   @media (max-width: 600px) {
     th, td { padding: .4rem .3rem; font-size: .85rem }
@@ -148,17 +153,31 @@
   <h2>Wedstrijd</h2>
   <div class="row">
     <input type="date" id="mDate"> <input id="mOpp" placeholder="Tegenstander">
+    <label>Status <select id="mStatus"><option value="draft">Concept</option><option value="ready">Klaar</option><option value="played">Gespeeld</option></select></label>
     <label>Wissel elke <select id="mInt"></select> min</label>
   </div>
+  <p id="statusHint" role="status"></p>
   <p id="mCat"></p>
   <div id="mPlayers"></div>
   <p><small id="keeperHint"></small></p>
-  <div class="row"><button id="gen">Nieuw wisselvoorstel</button> <button class="alt" id="printBtn">Printen / PDF</button> <button class="alt" id="delMatch">Verwijder wedstrijd</button></div>
+  <div class="row"><button id="gen">Nieuw wisselvoorstel</button> <button class="alt" id="undo" disabled>Laatste schemawijziging ongedaan</button> <button class="alt" id="matchModeBtn">Wedstrijdmodus</button> <button class="alt" id="printBtn">Printen / PDF</button> <button class="alt" id="delMatch">Verwijder wedstrijd</button></div>
   <p><small>Wie op de bank zit, speelt de volgende periode weer mee als dat mogelijk is. Het voorstel verdeelt daarna de speelminuten zo eerlijk mogelijk.</small></p>
+  <details id="fairness"><summary>Hoe verdeelt het voorstel de minuten?</summary>
+    <p>Eerst beperkt de app twee periodes achter elkaar op de bank over het hele schema, binnen de veldplekken en gekozen keepers. Binnen die mogelijkheden gaan spelers met minder minuten in deze wedstrijd voor. Bij de start telt daarna wie in eerdere gespeelde wedstrijden vaker eerste wissel was. Vervolgens tellen eerdere minuten ten opzichte van het gemiddelde van de aanwezigen en het wisselen van spelers. Bij gelijke keuzes wordt geloot.</p>
+    <p>Keeperminuten tellen mee als speelminuten; keeper- en veldminuten worden niet apart gelijk verdeeld. Afwezigheid telt niet als een tekort. De tabel toont feiten uit het bewaarde schema, geen verklaring voor een individuele keuze. Handmatige wijzigingen kunnen afwijken van een voorstel.</p>
+    <div id="fairnessData"></div>
+  </details>
   <p id="benchWarning" class="bad" role="status" hidden></p>
   <p id="firstBench"></p>
   <div id="schedule"></div>
-  <p><small>Klik op een groen of grijs vakje om een speler in of uit te zetten.</small></p>
+  <p><small>Klik op een groen of grijs vakje om een speler in of uit te zetten. Keeper per periode past alleen die periode aan, zonder nieuw voorstel. Staat de nieuwe keeper nog op de bank, dan komt die erbij: zet zo nodig een andere speler uit en controleer Op veld.</small></p>
+</section>
+
+<section id="modeSec" hidden aria-labelledby="modeHeading">
+  <h2 id="modeHeading">Wedstrijdmodus</h2>
+  <p>Jij kiest de periode. Er loopt geen automatische timer.</p>
+  <div class="row"><button class="alt" id="modePrev">Vorige periode</button><button id="modeForward">Volgende periode</button><button class="alt" id="modeClose">Sluiten</button></div>
+  <div aria-live="polite"><p id="modeCurrent"></p><p id="modeField"></p><p id="modeBench"></p><p id="modeKeeper"></p><h3>Volgende wissel</h3><p id="modeNext"></p></div>
 </section>
 
 <section id="boardSec" hidden>
@@ -172,12 +191,15 @@
 </section>
 
 <section class="needTeam">
-  <h2>Totalen (alle wedstrijden)</h2>
+  <h2>Totalen (gespeelde wedstrijden)</h2>
+  <p><small>Alleen Gespeeld telt mee, per aanwezige speler. Minuten zijn inclusief keeper; Veld min is zonder keeper. T.o.v. gem. vergelijkt met het gemiddelde van de aanwezigen in elke gespeelde wedstrijd (− = minder, + = meer). Oude wedstrijden met een afgeleide status tellen mee als hun datum vóór vandaag ligt; controleer die status.</small></p>
   <div id="stats"></div>
 </section>
 
 <section>
   <h2>Back-up</h2>
+  <p id="backupTime"></p>
+  <p id="backupReminder" role="status" hidden>Er zijn minstens drie gespeelde wedstrijden bijgekomen sinds je laatste back-up. Download binnenkort een nieuwe.</p>
   <div class="row">
     <button class="alt" id="export">Back-up downloaden</button>
     <button class="alt" id="importBtn">Back-up terugzetten</button><input type="file" id="import" accept=".json,application/json" hidden>
@@ -199,21 +221,17 @@ const KEEPER_POS = [50, 71], DEFAULT_POS = { // startplekken veldspelers per spe
 };
 let stored = localStorage.getItem(KEY), storageConflict = false;
 let db = JSON.parse(stored || '{"teams":[],"matches":[]}');
-if (db.players) { // oude opslag zonder teams: zet alles in één team, keeperlijst wordt keeper per kwart
-  const t = { id: 't' + Date.now().toString(36), name: 'Mijn team', players: db.players };
-  db = { teams: [t], team: t.id, matches: db.matches.map(m => ({ ...m, teamId: t.id,
-    keepers: [0, 1, 2, 3].map(q => m.keepers[q % m.keepers.length] ?? null) })) };
-}
-let cur = null, slot = 0, dragged = null;
+db = upgradeLegacy(db);
+let cur = null, slot = 0, dragged = null, modePeriod = 0, modeMatch = null;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const team = () => db.teams.find(t => t.id === db.team);
 const players = () => team()?.players ?? [];
-const name = id => db.teams.flatMap(t => t.players).find(p => p.id === id)?.name ?? '?';
+const name = id => players().find(p => p.id === id)?.name ?? '?';
 const match = () => db.matches.find(m => m.id === cur);
 const sorted = () => db.matches.filter(m => m.teamId === db.team).sort((a, b) => a.date.localeCompare(b.date));
-const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)); };
+const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)).filter(x => matchStatus(x).value === 'played'); };
 const save = () => {
   if (storageConflict) return false;
   if (localStorage.getItem(KEY) !== stored) {
@@ -227,7 +245,11 @@ const save = () => {
   stored = next;
   return true;
 };
-const regen = m => { generate(m, history(m)); slot = 0; };
+const statusLabel = m => ({ draft: 'Concept', ready: 'Klaar', played: 'Gespeeld' })[matchStatus(m).value] + (matchStatus(m).inferred ? ' (afgeleid)' : '');
+const scheduleFields = ['cat', 'interval', 'present', 'keepers', 'slots', 'keeperBySlot', 'pos', 'manual'];
+const remember = m => { m.undo = JSON.parse(JSON.stringify(Object.fromEntries(scheduleFields.filter(k => m[k] !== undefined).map(k => [k, m[k]])))); };
+const allowRegen = m => !m.slots.length || (m.manual === false && matchStatus(m).value !== 'played') || confirm('Dit vervangt het bewaarde of handmatig aangepaste schema, ook als de wedstrijd Gespeeld is. Toch een nieuw voorstel maken? Je kunt de laatste schemawijziging ongedaan maken.');
+const regen = m => { generate(m, history(m)); m.manual = false; slot = 0; };
 // Minuten tonen: hele minuten als getal, anders m:ss (bv. 6:15 bij JO10)
 const fmt = x => Number.isInteger(x) ? String(x) : `${Math.floor(x)}:${String(Math.round(x % 1 * 60)).padStart(2, '0')}`;
 const catOptions = sel => Object.entries(CATS).map(([k, c]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${c.label}</option>`).join('');
@@ -248,16 +270,22 @@ function render() {
   $('#players').innerHTML = players().map(p =>
     `<span class="chip">${esc(p.name)}<button data-del="${p.id}" title="Verwijder speler">×</button></span>`).join('') || 'Nog geen spelers.';
   $('#matches').innerHTML = sorted().map(m =>
-    `<button class="${m.id === cur ? '' : 'alt'}" data-m="${m.id}">${esc(m.date)} ${esc(m.opponent)}</button>`).join('');
+    `<button class="${m.id === cur ? '' : 'alt'}" data-m="${m.id}">${esc(m.date)} ${esc(m.opponent)} · ${statusLabel(m)}</button>`).join('');
   renderStats();
+  renderBackup();
   const m = match();
   $('#matchSec').hidden = $('#boardSec').hidden = !m;
   if (m) { renderMatch(m); renderBoard(m); }
   renderPrint(m);
+  if (!m || (modeMatch && modeMatch !== m.id)) { $('#modeSec').hidden = true; modeMatch = null; modePeriod = 0; }
+  if (m) renderMatchMode(m);
 }
 
 function renderMatch(m) {
   const c = cat(m);
+  $('#undo').disabled = !m.undo;
+  $('#mStatus').value = matchStatus(m).value;
+  $('#statusHint').textContent = matchStatus(m).inferred ? 'Oude wedstrijd: status afgeleid van de datum (vóór vandaag: Gespeeld; anders: Klaar). Kies zelf de juiste status. Het schema blijft bewaard.' : matchStatus(m).value === 'played' ? 'Dit schema telt als werkelijk gespeeld. Pas het na afloop aan als er anders is gewisseld.' : 'Voorbereiding: telt niet mee in totalen of eerdere wedstrijden.';
   $('#mDate').value = m.date; $('#mOpp').value = m.opponent;
   $('#mInt').innerHTML = intervals(c).map(x => `<option value="${x}" ${x === m.interval ? 'selected' : ''}>${fmt(x)}</option>`).join('');
   $('#mCat').textContent = `Categorie: ${c.label} (${c.field} spelers in het veld${c.keeper ? ', inclusief keeper' : ''})`;
@@ -270,6 +298,7 @@ function renderMatch(m) {
         m.keepers.map((k, q) => `<td><input type="checkbox" data-keeper="${p.id}" data-q="${q}" ${k === p.id ? 'checked' : ''} ${here ? '' : 'disabled'}></td>`).join('') + '</tr>';
     }).join('') + '</table>';
   $('#schedule').innerHTML = scheduleTable(m);
+  renderFairness(m);
   $('#benchWarning').textContent = benchWarning(m);
   $('#benchWarning').hidden = !benchWarning(m);
   const first = m.slots[0] ? m.present.filter(id => !m.slots[0].includes(id)) : [];
@@ -287,7 +316,7 @@ const legend = m => `<div class="legend"><span><i class="on">●</i> Op het veld
   `<span><i class="k">K</i> Keeper</span><span><i class="bad">5</i> Aantal spelers klopt niet: er moeten ${cat(m).field} op het veld staan</span>` +
   `<span>0', ${fmt(m.interval)}', … = minuut waarop de periode begint</span><span>Min = totale speelminuten</span></div>`;
 
-function scheduleTable(m) {
+function scheduleTable(m, interactive = true) {
   if (!m.slots.length) return '';
   const min = minutes(m);
   const head = m.slots.map((_, i) => `<th>${fmt(i * m.interval)}'</th>`).join('');
@@ -297,7 +326,8 @@ function scheduleTable(m) {
     `<td>${fmt(min[id])}</td></tr>`).join('');
   const count = '<tr class="count"><td>Op veld</td>' + m.slots.map(on =>
     `<td class="${on.length === cat(m).field ? '' : 'bad'}">${on.length}</td>`).join('') + '<td></td></tr>';
-  return `<table><tr><th>Speler</th>${head}<th>Min</th></tr>${rows}${count}</table>` + legend(m);
+  const keeperEdit = interactive && cat(m).keeper ? '<tr><td>Keeper per periode</td>' + m.slots.map((on, i) => `<td><select aria-label="Keeper periode ${i + 1}" data-actual-keeper="${i}"><option value="">Geen</option>${m.present.map(id => `<option value="${id}" ${m.keeperBySlot[i] === id ? 'selected' : ''}>${esc(name(id))}</option>`).join('')}</select></td>`).join('') + '<td></td></tr>' : '';
+  return `<table><tr><th>Speler</th>${head}<th>Min</th></tr>${rows}${count}${keeperEdit}</table>` + legend(m);
 }
 
 // Printbare export: wordt bij elke render bijgewerkt, zodat ook Ctrl+P werkt
@@ -314,12 +344,29 @@ function renderPrint(m) {
       `<td>${k !== m.keeperBySlot[j] ? esc(k ? name(k) : 'geen keeper') : ''}</td></tr>`;
   }).join('');
   $('#printOut').innerHTML = `<h1>${esc(team()?.name ?? '')}${m.opponent ? ' tegen ' + esc(m.opponent) : ''}</h1>` +
-    `<p>${esc(date)} · ${cat(m).label} · wissel elke ${fmt(m.interval)} min</p>` +
+    `<p>${esc(date)} · ${cat(m).label} · ${statusLabel(m)} · wissel elke ${fmt(m.interval)} min</p>` +
     `<h2>Beginopstelling</h2><p><b>Keeper:</b> ${esc(k0 ? name(k0) : 'geen')}<br>` +
     `<b>Veld:</b> ${esc(list(on0.filter(id => id !== k0)))}<br><b>Wissels:</b> ${esc(list(m.present.filter(id => !on0.includes(id))))}</p>` +
-    `<h2>Wisselschema</h2>${benchWarning(m) ? `<p class="bad">${esc(benchWarning(m))}</p>` : ''}${scheduleTable(m)}` +
+    `<h2>Wisselschema</h2>${benchWarning(m) ? `<p class="bad">${esc(benchWarning(m))}</p>` : ''}${scheduleTable(m, false)}` +
     (changes ? `<h2>Wisselmomenten</h2><table><tr><th>Minuut</th><th>Erin</th><th>Eruit</th><th>Nieuwe keeper</th></tr>${changes}</table>` : '');
 }
+
+function renderMatchMode(m) {
+  modePeriod = Math.max(0, Math.min(modePeriod, m.slots.length - 1));
+  const i = modePeriod, on = m.slots[i] || [], k = m.keeperBySlot[i], next = m.slots[i + 1];
+  const list = ids => ids.map(name).join(', ') || 'geen';
+  $('#modeCurrent').textContent = m.slots.length ? `${m.opponent || 'Wedstrijd'} · ${statusLabel(m)} · Periode ${i + 1}: ${fmt(i * m.interval)}–${fmt((i + 1) * m.interval)} min` : 'Nog geen schema.';
+  $('#modeField').textContent = 'Veld: ' + list(on.filter(id => id !== k));
+  $('#modeBench').textContent = 'Bank: ' + list(m.present.filter(id => !on.includes(id)));
+  $('#modeKeeper').textContent = 'Keeper: ' + (k ? name(k) : 'geen');
+  $('#modeNext').textContent = next ? `Bij ${fmt((i + 1) * m.interval)} min — Erin: ${list(next.filter(id => !on.includes(id)))}. Eruit: ${list(on.filter(id => !next.includes(id)))}. Keeper: ${m.keeperBySlot[i + 1] ? name(m.keeperBySlot[i + 1]) : 'geen'}${k !== m.keeperBySlot[i + 1] ? ' (wisselt)' : ' (blijft)'}.` : 'Laatste periode: geen volgende wissel.';
+  $('#modePrev').disabled = i === 0;
+  $('#modeForward').disabled = !next;
+}
+$('#matchModeBtn').onclick = () => { modeMatch = cur; modePeriod = 0; $('#modeSec').hidden = false; renderMatchMode(match()); $('#modeSec').scrollIntoView?.({ behavior: 'smooth', block: 'start' }); };
+$('#modeClose').onclick = () => { $('#modeSec').hidden = true; modeMatch = null; };
+$('#modePrev').onclick = () => { modePeriod = Math.max(0, modePeriod - 1); renderMatchMode(match()); };
+$('#modeForward').onclick = () => { modePeriod = Math.min(match().slots.length - 1, modePeriod + 1); renderMatchMode(match()); };
 
 function renderBoard(m) {
   $('#slots').innerHTML = m.slots.map((_, i) =>
@@ -327,8 +374,9 @@ function renderBoard(m) {
   document.querySelectorAll('.token').forEach(t => t.remove());
   const on = m.slots[slot] || [], k = m.keeperBySlot[slot];
   const bench = m.present.filter(id => !on.includes(id));
-  place(m, on, k);
-  const tokens = on.map(id => [id, id === k ? (m.pos.K || KEEPER_POS) : m.pos[id]])
+  const display = { ...m, pos: JSON.parse(JSON.stringify(m.pos)) };
+  place(display, on, k);
+  const tokens = on.map(id => [id, id === k ? (display.pos.K || KEEPER_POS) : display.pos[id]])
     .concat(bench.map((id, i) => { // bij meer dan 5 wissels over twee rijen, anders liggen ze over elkaar
       const per = bench.length > 5 ? Math.ceil(bench.length / 2) : bench.length, row = Math.floor(i / per);
       const n = Math.min(per, bench.length - row * per);
@@ -343,7 +391,7 @@ function renderBoard(m) {
   });
 }
 
-// Geeft elke veldspeler een vaste plek (bewaard in m.pos), zodat niemand verspringt als je een ander sleept.
+// Compute collision-free display positions on a copy; only explicit dragging writes m.pos.
 // Ligt een plek te dicht op een andere speler (bv. iemand terug van de bank), dan krijgt die speler een vrije startplek;
 // de net gesleepte speler houdt altijd zijn plek.
 function place(m, on, k) {
@@ -356,14 +404,21 @@ function place(m, on, k) {
     taken.push(m.pos[id] = p.slice());
   });
   dragged = null;
-  save();
 }
 
+function renderFairness(m) {
+  const min = minutes(m), earlier = stats(history(m));
+  $('#fairnessData').innerHTML = '<table><tr><th>Speler</th><th>Min</th><th>Keeper min</th><th>Veld min</th><th>Eerdere gespeelde (aanwezig)</th><th>Eerder t.o.v. gem.</th></tr>' + m.present.map(id => {
+    const keeper = m.keeperBySlot.filter((k, i) => k === id && m.slots[i]?.includes(id)).length * m.interval, h = earlier[id];
+    return `<tr><td>${esc(name(id))}</td><td>${fmt(min[id])}</td><td>${fmt(keeper)}</td><td>${fmt(min[id] - keeper)}</td><td>${h?.matches || 0}</td><td>${signed(h?.diff || 0)}</td></tr>`;
+  }).join('') + '</table>';
+}
+const signed = x => (x < 0 ? '−' : x > 0 ? '+' : '') + fmt(Math.abs(x));
 function renderStats() {
   const s = stats(sorted());
-  $('#stats').innerHTML = '<table><tr><th>Speler</th><th>Wedstr.</th><th>Minuten</th><th>Gem.</th><th>Eerste wissel</th><th>Keeper min</th></tr>' +
+  $('#stats').innerHTML = '<table><tr><th>Speler</th><th>Wedstr.</th><th>Minuten</th><th>Gem.</th><th>Eerste wissel</th><th>Keeper min</th><th>Veld min</th><th>T.o.v. gem.</th></tr>' +
     players().map(p => { const x = s[p.id] || { matches: 0, minutes: 0, benchStarts: 0, keeper: 0 };
-      return `<tr><td>${esc(p.name)}</td><td>${x.matches}</td><td>${fmt(x.minutes)}</td><td>${x.matches ? Math.round(x.minutes / x.matches) : '-'}</td><td>${x.benchStarts}</td><td>${fmt(x.keeper)}</td></tr>`;
+      return `<tr><td>${esc(p.name)}</td><td>${x.matches}</td><td>${fmt(x.minutes)}</td><td>${x.matches ? Math.round(x.minutes / x.matches) : '-'}</td><td>${x.benchStarts}</td><td>${fmt(x.keeper)}</td><td>${fmt(x.minutes - x.keeper)}</td><td>${signed(x.diff || 0)}</td></tr>`;
     }).join('') + '</table>';
 }
 
@@ -380,7 +435,7 @@ $('#teamCat').onchange = e => {
   const k = e.target.value, old = sorted().filter(m => cat(m) !== CATS[k]);
   team().cat = k;
   if (old.length && confirm(`Ook bestaande wedstrijden (${old.length}) omzetten naar ${k}? De app maakt hun wisselschema’s opnieuw.`))
-    old.forEach(m => { setCat(m, k); generate(m, history(m)); });
+    old.forEach(m => { remember(m); setCat(m, k); regen(m); });
   render();
 };
 $('#delTeam').onclick = () => {
@@ -408,7 +463,7 @@ $('#newMatch').onclick = () => {
   const baseId = Date.now().toString(36);
   let id = baseId, suffix = 1;
   while (db.matches.some(m => m.id === id)) id = `${baseId}-${suffix++}`;
-  const m = { id, teamId: db.team, date: new Date().toISOString().slice(0, 10), opponent: '',
+  const m = { id, teamId: db.team, date: new Date().toISOString().slice(0, 10), opponent: '', status: 'draft',
               present: players().map(p => p.id), slots: [], keeperBySlot: [], pos: {} };
   setCat(m, team().cat ?? 'JO9');
   db.matches.push(m); cur = m.id; regen(m); render();
@@ -417,15 +472,20 @@ $('#matches').onclick = e => { if (e.target.dataset.m) { cur = e.target.dataset.
 $('#delMatch').onclick = () => {
   if (confirm('Wedstrijd verwijderen?')) { db.matches = db.matches.filter(m => m.id !== cur); cur = null; render(); }
 };
-$('#gen').onclick = () => { regen(match()); render(); };
+$('#gen').onclick = () => { const m = match(); if (!allowRegen(m)) return; remember(m); regen(m); render(); };
+$('#undo').onclick = () => { const m = match(); if (!m.undo) return; const previous = m.undo; scheduleFields.forEach(k => delete m[k]); Object.assign(m, previous); delete m.undo; slot = 0; render(); };
+$('#mStatus').onchange = e => { match().status = e.target.value; render(); };
 $('#printBtn').onclick = () => window.print();
 $('#mDate').oninput = e => { match().date = e.target.value; save(); };
 $('#mOpp').oninput = e => { match().opponent = e.target.value; save(); };
 $('#mDate').onchange = e => { match().date = e.target.value; render(); };
 $('#mOpp').onchange = e => { match().opponent = e.target.value; render(); };
-$('#mInt').onchange = e => { const m = match(); m.interval = +e.target.value; regen(m); render(); };
+$('#mInt').onchange = e => { const m = match(); if (!allowRegen(m)) { $('#mInt').value = m.interval; return; } remember(m); m.interval = +e.target.value; regen(m); render(); };
 $('#matchSec').onchange = e => {
   const m = match(), t = e.target;
+  if (!t.dataset.present && !t.dataset.keeper) return;
+  if (!allowRegen(m)) { renderMatch(m); return; }
+  remember(m);
   if (t.dataset.present) m.present = t.checked ? m.present.concat(t.dataset.present) : m.present.filter(x => x !== t.dataset.present);
   else if (t.dataset.keeper) m.keepers[t.dataset.q] = t.checked ? t.dataset.keeper : null; // één keeper per blok
   else return;
@@ -435,27 +495,47 @@ $('#matchSec').onchange = e => {
 $('#schedule').onclick = e => {
   const c = e.target.dataset.cell; if (c === undefined) return;
   const m = match(), id = e.target.dataset.id;
+  remember(m); m.manual = true;
   m.slots[c] = m.slots[c].includes(id) ? m.slots[c].filter(x => x !== id) : m.slots[c].concat(id);
   render();
 };
 
+// Direct keeper correction preserves every other period and proposal setting.
+$('#schedule').onchange = e => {
+  const i = e.target.dataset.actualKeeper;
+  if (i === undefined) return;
+  const m = match(), id = e.target.value || null;
+  remember(m); m.manual = true;
+  m.keeperBySlot[i] = id;
+  if (id && !m.slots[i].includes(id)) m.slots[i].push(id);
+  render();
+};
+
 // Back-up
-$('#export').onclick = () => {
+const playedCount = () => db.matches.filter(m => matchStatus(m).value === 'played').length;
+function renderBackup() {
+  $('#backupTime').textContent = db.backup ? 'Laatste download aangevraagd: ' + new Date(db.backup.lastExportAt).toLocaleString('nl-NL') + '. Controleer zelf of het bestand veilig is opgeslagen.' : 'Nog geen back-updownload geregistreerd. Download regelmatig een back-up.';
+  $('#backupReminder').hidden = playedCount() - (db.backup?.playedAtExport || 0) < 3;
+}
+function downloadBackup(track = true) {
+  if (track) { db.backup = { lastExportAt: new Date().toISOString(), playedAtExport: playedCount() }; if (!save()) return false; renderBackup(); }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
   a.download = `wissels-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
-};
+  return true;
+}
+$('#export').onclick = () => downloadBackup();
 $('#importBtn').onclick = () => $('#import').click();
 $('#import').onchange = async e => {
   const file = e.target.files[0]; e.target.value = '';
   if (!file) return;
   let data;
-  try { data = JSON.parse(await file.text()); } catch { data = null; }
-  if (!Array.isArray(data?.teams) || !Array.isArray(data?.matches)) { alert('Dit is geen geldig back-upbestand.'); return; }
+  try { data = validateBackup(JSON.parse(await file.text())); } catch { alert('Dit is geen geldig back-upbestand. Er is niets vervangen. Controleer teams, spelers, wedstrijden en schema’s.'); return; }
+  if (confirm('Eerst een back-up van je huidige gegevens downloaden? Daarna kun je het terugzetten nog annuleren.')) downloadBackup(false);
   if (!confirm(`Deze back-up terugzetten? Aantal teams: ${data.teams.length}. Aantal wedstrijden: ${data.matches.length}. Dit vervangt alle huidige teams en wedstrijden in deze browser.`)) return;
-  db = data; db.team ??= db.teams[0]?.id; cur = null;
+  db = data; db.team ??= db.teams[0]?.id; cur = null; modeMatch = null; $('#modeSec').hidden = true;
   render();
 };
 
@@ -475,6 +555,7 @@ $('#board').onpointerdown = e => {
   t.onpointerup = () => {
     t.onpointermove = t.onpointerup = t.onpointercancel = null;
     const m = match(), id = t.dataset.id, x = parseFloat(t.style.left), y = parseFloat(t.style.top), toField = y < PITCH_Y;
+    remember(m); m.manual = true;
     if (id === m.keeperBySlot[slot]) { if (toField) m.pos.K = [x, y]; }
     else if (toField) { if (!m.slots[slot].includes(id)) m.slots[slot].push(id); m.pos[id] = [x, y]; dragged = id; }
     else { m.slots[slot] = m.slots[slot].filter(p => p !== id); delete m.pos[id]; }

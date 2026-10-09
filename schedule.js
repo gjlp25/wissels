@@ -24,7 +24,7 @@ function minutes(m) {
 function stats(history) {
   const s = {};
   const get = id => s[id] ??= { matches: 0, minutes: 0, benchStarts: 0, keeper: 0, diff: 0 };
-  history.filter(m => m.slots.length).forEach(m => {
+  history.filter(m => matchStatus(m).value === 'played' && m.slots.length).forEach(m => {
     const min = minutes(m), avg = m.present.reduce((t, id) => t + min[id], 0) / m.present.length;
     m.present.forEach(id => {
       const p = get(id);
@@ -101,4 +101,60 @@ function generate(m, history) {
   return m;
 }
 
-if (typeof module !== 'undefined') module.exports = { CATS, cat, intervals, minutes, stats, generate };
+// Legacy dates are evidence of preparation, not proof of play. Never write inferred status.
+const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+function matchStatus(m, today = localDay()) {
+  return m.status ? { value: m.status, inferred: false }
+    : { value: m.date && m.date < today ? 'played' : 'ready', inferred: true };
+}
+
+// Preserve pre-team player/match IDs and saved schedules during the existing migration.
+function upgradeLegacy(input) {
+  if (!input || input.teams !== undefined || !Array.isArray(input.players) || !Array.isArray(input.matches)) return input;
+  const t = { id: 'legacy-team', name: 'Mijn team', players: input.players };
+  const result = { ...input, teams: [t], team: t.id, matches: input.matches.map(m => ({ ...m, teamId: t.id,
+    keepers: Array.from({ length: 4 }, (_, q) => m.keepers?.[q % m.keepers.length] ?? null) })) };
+  delete result.players;
+  return result;
+}
+// Validate before replacing any browser state. Historical deleted-player references are allowed.
+function validateBackup(input) {
+  const fail = () => { throw new Error('Dit is geen geldig back-upbestand: controleer teams, spelers, wedstrijden en schema’s.'); };
+  if (input?.teams === undefined && Array.isArray(input?.players) && (!Array.isArray(input.matches) || !input.matches.every(m => Array.isArray(m?.keepers)))) fail();
+  input = upgradeLegacy(input);
+  const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
+  const id = x => typeof x === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(x) && !['constructor', 'prototype', '__proto__'].includes(x);
+  const ids = x => Array.isArray(x) && x.every(id) && new Set(x).size === x.length;
+  const text = x => typeof x === 'string';
+  if (!object(input) || !Array.isArray(input.teams) || !Array.isArray(input.matches)) fail();
+  if (input.version !== undefined && input.version !== 1) fail();
+  if (!ids(input.teams.map(t => t?.id)) || !ids(input.matches.map(m => m?.id))) fail();
+  for (const t of input.teams) {
+    if (!object(t) || !text(t.name) || !Array.isArray(t.players) || (t.cat !== undefined && (!text(t.cat) || !Object.hasOwn(CATS, t.cat)))) fail();
+    if (!ids(t.players.map(p => p?.id))) fail();
+    for (const p of t.players) { if (!object(p) || !id(p.id) || !text(p.name)) fail(); }
+  }
+  if (input.team !== undefined && !input.teams.some(t => t.id === input.team)) fail();
+  const validSchedule = m => {
+    if (!object(m) || (m.cat !== undefined && (!text(m.cat) || !Object.hasOwn(CATS, m.cat))) || !intervals(cat(m)).includes(m.interval) || !ids(m.present)) fail();
+    if (!Array.isArray(m.keepers) || m.keepers.length > cat(m).blocks || !m.keepers.every(k => k === null || (id(k) && m.present.includes(k)))) fail();
+    if (!Array.isArray(m.slots) || m.slots.length > cat(m).blocks * cat(m).block / m.interval || !m.slots.every(on => ids(on) && on.every(p => m.present.includes(p)))) fail();
+    if (!Array.isArray(m.keeperBySlot) || m.keeperBySlot.length !== m.slots.length || !m.keeperBySlot.every((k, i) => k === null || (id(k) && m.slots[i].includes(k)))) fail();
+    if (!object(m.pos) || !Object.entries(m.pos).every(([k, p]) => (k === 'K' || id(k)) && Array.isArray(p) && p.length === 2 && p.every(n => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 100))) fail();
+    if (m.manual !== undefined && typeof m.manual !== 'boolean') fail();
+  };
+  for (const m of input.matches) {
+    if (!object(m) || !input.teams.some(t => t.id === m.teamId) || !text(m.opponent) || !text(m.date)) fail();
+    if (m.date && (!/^\d{4}-\d{2}-\d{2}$/.test(m.date) || !Number.isFinite(Date.parse(m.date)) || new Date(m.date).toISOString().slice(0, 10) !== m.date)) fail();
+    if (m.status !== undefined && !['draft', 'ready', 'played'].includes(m.status)) fail();
+    validSchedule(m);
+    if (m.undo !== undefined) {
+      if (!object(m.undo) || Object.keys(m.undo).some(k => !['cat', 'interval', 'present', 'keepers', 'slots', 'keeperBySlot', 'pos', 'manual'].includes(k))) fail();
+      validSchedule(m.undo);
+    }
+  }
+  if (input.backup !== undefined && (!object(input.backup) || !text(input.backup.lastExportAt) || !Number.isFinite(Date.parse(input.backup.lastExportAt)) || !Number.isInteger(input.backup.playedAtExport) || input.backup.playedAtExport < 0)) fail();
+  return JSON.parse(JSON.stringify(input));
+}
+
+if (typeof module !== 'undefined') module.exports = { CATS, cat, intervals, minutes, stats, generate, localDay, matchStatus, validateBackup, upgradeLegacy };

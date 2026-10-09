@@ -4,7 +4,7 @@ const { CATS, minutes, generate } = require('./schedule.js');
 const FIELD = CATS.JO9.field;
 
 const ids = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
-const mk = (interval, keepers) => ({ present: ids, keepers, interval, slots: [], keeperBySlot: [] });
+const mk = (interval, keepers) => ({ status: 'played', present: ids, keepers, interval, slots: [], keeperBySlot: [] });
 const A = ['a', 'a', 'a', 'a'];
 
 // 5 min, 1 keeper: 8 veldspelers delen 5 plekken x 40 min -> iedereen precies 25 min
