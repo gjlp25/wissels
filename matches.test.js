@@ -15,6 +15,25 @@ function app(storage = { value: JSON.stringify(initial()) }) {
   vm.runInContext(fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1], context);
   return { node, alerts, storage, reloads:()=>reloadCount, data:()=>JSON.parse(storage.value), run:code=>vm.runInContext(code, context) };
 }
+test('bench warning follows actual slots after manual edits and appears in print', () => {
+  const a = app(); a.node('#newMatch').onclick();
+  assert.equal(a.node('#benchWarning').textContent || '', '');
+  const id = a.data().matches[0].present.find(id => !a.data().matches[0].slots[0].includes(id));
+  a.node('#schedule').onclick({ target: { dataset: { cell: '1', id } } });
+  assert.match(a.node('#benchWarning').textContent || '', /twee periodes achter elkaar/);
+  assert.match(a.node('#printOut').innerHTML, /twee periodes achter elkaar/);
+  a.node('#schedule').onclick({ target: { dataset: { cell: '1', id } } });
+  assert.equal(a.node('#benchWarning').textContent, '');
+  assert.doesNotMatch(a.node('#printOut').innerHTML, /twee periodes achter elkaar/);
+});
+test('loading and opening an old prepared schedule does not regenerate its slots', () => {
+  const data = initial();
+  data.matches.push({ id: 'old', teamId: 'team', cat: 'JO9', date: '2026-10-01', opponent: 'Old preparation', present: data.teams[0].players.map(p => p.id), keepers: [], interval: 10, slots: Array.from({ length: 4 }, () => ['p0','p1','p2','p3','p4','p5']), keeperBySlot: [null,null,null,null], pos: {} });
+  const a = app({ value: JSON.stringify(data) });
+  a.node('#matches').onclick({ target: { dataset: { m: 'old' } } });
+  assert.deepEqual(a.data().matches[0].slots, data.matches[0].slots);
+  assert.match(a.node('#benchWarning').textContent || '', /twee periodes achter elkaar/);
+});
 test('a stale tab cannot overwrite matches saved by another tab', () => {
   const storage={value:JSON.stringify(initial())};
   const first=app(storage), stale=app(storage);

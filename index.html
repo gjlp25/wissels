@@ -87,6 +87,8 @@
   <div id="mPlayers"></div>
   <p><small id="keeperHint"></small></p>
   <div class="row"><button id="gen">Nieuw wisselvoorstel</button> <button class="alt" id="printBtn">Printen / PDF</button> <button class="alt" id="delMatch">Verwijder wedstrijd</button></div>
+  <p><small>Wie op de bank zit, speelt de volgende periode weer mee als dat mogelijk is. Het voorstel verdeelt daarna de speelminuten zo eerlijk mogelijk.</small></p>
+  <p id="benchWarning" class="bad" role="status" hidden></p>
   <p id="firstBench"></p>
   <div id="schedule"></div>
   <p><small>Klik op een groen of grijs vakje om een speler in of uit te zetten.</small></p>
@@ -199,8 +201,17 @@ function renderMatch(m) {
         m.keepers.map((k, q) => `<td><input type="checkbox" data-keeper="${p.id}" data-q="${q}" ${k === p.id ? 'checked' : ''} ${here ? '' : 'disabled'}></td>`).join('') + '</tr>';
     }).join('') + '</table>';
   $('#schedule').innerHTML = scheduleTable(m);
+  $('#benchWarning').textContent = benchWarning(m);
+  $('#benchWarning').hidden = !benchWarning(m);
   const first = m.slots[0] ? m.present.filter(id => !m.slots[0].includes(id)) : [];
   $('#firstBench').textContent = first.length ? 'Eerste wissels: ' + first.map(name).join(', ') : '';
+}
+
+// Derived from the current slots, including old schedules and manual edits.
+function benchWarning(m) {
+  const affected = m.present.filter(id => m.slots.some((on, i) =>
+    i > 0 && !on.includes(id) && !m.slots[i - 1].includes(id)));
+  return affected.length ? `Let op: twee periodes achter elkaar op de bank: ${affected.map(name).join(', ')}. Een nieuw voorstel beperkt dit zo veel mogelijk binnen het aantal veldplekken en je keeperkeuze. Handmatige wijzigingen kunnen dit ook veroorzaken.` : '';
 }
 
 const legend = m => `<div class="legend"><span><i class="on">●</i> Op het veld</span><span><i class="off">&nbsp;</i> Wissel (op de bank)</span>` +
@@ -237,7 +248,7 @@ function renderPrint(m) {
     `<p>${esc(date)} · ${cat(m).label} · wissel elke ${fmt(m.interval)} min</p>` +
     `<h2>Beginopstelling</h2><p><b>Keeper:</b> ${esc(k0 ? name(k0) : 'geen')}<br>` +
     `<b>Veld:</b> ${esc(list(on0.filter(id => id !== k0)))}<br><b>Wissels:</b> ${esc(list(m.present.filter(id => !on0.includes(id))))}</p>` +
-    `<h2>Wisselschema</h2>${scheduleTable(m)}` +
+    `<h2>Wisselschema</h2>${benchWarning(m) ? `<p class="bad">${esc(benchWarning(m))}</p>` : ''}${scheduleTable(m)}` +
     (changes ? `<h2>Wisselmomenten</h2><table><tr><th>Minuut</th><th>Erin</th><th>Eruit</th><th>Nieuwe keeper</th></tr>${changes}</table>` : '');
 }
 
