@@ -18,7 +18,8 @@ With a working Docker daemon:
 
 ```sh
 docker compose up -d --build
-# Open http://localhost:8080/ and test the manual and every image link.
+# Open http://localhost:9091/ and test the manual and every image link.
+# The committed docker-compose.override.yml overrides the published port to 9091.
 docker compose down
 ```
 
