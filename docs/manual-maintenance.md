@@ -39,6 +39,7 @@ For updates, use fixed desktop viewport 1100×1000 and Dutch browser locale. See
 - Open each image, return, and follow the back link to the app. Returning to the app preserves localStorage but does not promise to reopen the previously selected match.
 - Monitor browser requests and page errors: all manual resources must stay on the local origin, with no external services or entered-data requests.
 - Exercise app creation, presence, keeper selection, generation, a paired cell edit, a pointer drag, JSON download and restore on fictional data. Restore must replace current data only after the existing confirmation. Verify PDF output from the existing print document.
-- Verify schedule.js, schedule.test.js, the inline app script and the storage key are unchanged.
+- Run `node --test` for the full suite, including restore cancellation and replacement coverage in `copy.test.js`.
+- For copy-only updates, preserve scheduling logic, category numbers, selectors, storage keys and backup contracts. Compare JavaScript structure independently of user-facing string values; review every changed string separately. Regenerate screenshots when visible app text changes, and repeat captures to check determinism.
 
 This repository has no configured GitHub Actions workflows at implementation time. Local tests are evidence, not a claim of CI success. Docker COPY coverage is a static contract; a real container build still requires an available daemon.

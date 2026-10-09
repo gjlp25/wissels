@@ -89,7 +89,7 @@
   <div class="row"><button id="gen">Nieuw wisselvoorstel</button> <button class="alt" id="printBtn">Printen / PDF</button> <button class="alt" id="delMatch">Verwijder wedstrijd</button></div>
   <p id="firstBench"></p>
   <div id="schedule"></div>
-  <p><small>Klik op een vakje om een speler handmatig in of uit te zetten.</small></p>
+  <p><small>Klik op een groen of grijs vakje om een speler in of uit te zetten.</small></p>
 </section>
 
 <section id="boardSec" hidden>
@@ -99,7 +99,7 @@
     <div id="pitch"><div class="mid"></div><div class="circle"></div><div class="box top"></div><div class="box bottom"></div></div>
     <div id="bench"><span>Wissels</span></div>
   </div>
-  <p><small>Sleep spelers over het veld, of tussen veld en wisselbank (past het schema aan).</small></p>
+  <p><small>Sleep spelers naar een plek op het veld. Slepen tussen veld en wisselbank verandert het schema.</small></p>
 </section>
 
 <section class="needTeam">
@@ -113,7 +113,7 @@
     <button class="alt" id="export">Back-up downloaden</button>
     <button class="alt" id="importBtn">Back-up terugzetten</button><input type="file" id="import" accept=".json,application/json" hidden>
   </div>
-  <p><small>Gegevens staan alleen in deze browser. Download af en toe een back-up, of gebruik die om alles naar een ander apparaat over te zetten.</small></p>
+  <p><small>Je gegevens staan in deze browser. Download regelmatig een back-up. Daarmee kun je ze ook naar een andere browser of een ander apparaat overzetten. Terugzetten vervangt de huidige gegevens.</small></p>
 </section>
 
 <div id="printOut"></div>
@@ -175,7 +175,7 @@ function render() {
   document.querySelectorAll('.needTeam').forEach(s => s.hidden = !team());
   $('#teamCat').innerHTML = catOptions(team()?.cat ?? 'JO9');
   $('#players').innerHTML = players().map(p =>
-    `<span class="chip">${esc(p.name)}<button data-del="${p.id}" title="Verwijder">×</button></span>`).join('') || 'Nog geen spelers.';
+    `<span class="chip">${esc(p.name)}<button data-del="${p.id}" title="Verwijder speler">×</button></span>`).join('') || 'Nog geen spelers.';
   $('#matches').innerHTML = sorted().map(m =>
     `<button class="${m.id === cur ? '' : 'alt'}" data-m="${m.id}">${esc(m.date)} ${esc(m.opponent)}</button>`).join('');
   renderStats();
@@ -191,7 +191,7 @@ function renderMatch(m) {
   $('#mInt').innerHTML = intervals(c).map(x => `<option value="${x}" ${x === m.interval ? 'selected' : ''}>${fmt(x)}</option>`).join('');
   $('#mCat').textContent = `Categorie: ${c.label} (${c.field} spelers in het veld${c.keeper ? ', inclusief keeper' : ''})`;
   $('#keeperHint').textContent = c.keeper
-    ? `Vink per blok van ${fmt(c.block)} min (tot de time-out of rust) de keeper aan. Geen keeper aangevinkt = ${c.field} veldspelers.` : '';
+    ? `Kies per blok van ${fmt(c.block)} min een keeper. Een blok loopt tot de time-out of rust. Zonder keeper staan er ${c.field} veldspelers.` : '';
   $('#mPlayers').innerHTML = '<table><tr><th>Speler</th><th>Aanwezig</th>' +
     m.keepers.map((_, q) => `<th>${q ? '' : 'Keeper '}${fmt(q * c.block)}'</th>`).join('') + '</tr>' +
     players().map(p => { const here = m.present.includes(p.id);
@@ -204,8 +204,8 @@ function renderMatch(m) {
 }
 
 const legend = m => `<div class="legend"><span><i class="on">●</i> Op het veld</span><span><i class="off">&nbsp;</i> Wissel (op de bank)</span>` +
-  `<span><i class="k">K</i> Keeper</span><span><i class="bad">5</i> Aantal op veld klopt niet (moet ${cat(m).field} zijn)</span>` +
-  `<span>0', ${fmt(m.interval)}', … = minuut waarop de periode begint</span><span>Min = totaal speelminuten</span></div>`;
+  `<span><i class="k">K</i> Keeper</span><span><i class="bad">5</i> Aantal spelers klopt niet: er moeten ${cat(m).field} op het veld staan</span>` +
+  `<span>0', ${fmt(m.interval)}', … = minuut waarop de periode begint</span><span>Min = totale speelminuten</span></div>`;
 
 function scheduleTable(m) {
   if (!m.slots.length) return '';
@@ -233,7 +233,7 @@ function renderPrint(m) {
     return `<tr><td>${fmt(i * m.interval)}'</td><td>${esc(list(inn))}</td><td>${esc(list(out))}</td>` +
       `<td>${k !== m.keeperBySlot[j] ? esc(k ? name(k) : 'geen keeper') : ''}</td></tr>`;
   }).join('');
-  $('#printOut').innerHTML = `<h1>${esc(team()?.name ?? '')}${m.opponent ? ' – ' + esc(m.opponent) : ''}</h1>` +
+  $('#printOut').innerHTML = `<h1>${esc(team()?.name ?? '')}${m.opponent ? ' tegen ' + esc(m.opponent) : ''}</h1>` +
     `<p>${esc(date)} · ${cat(m).label} · wissel elke ${fmt(m.interval)} min</p>` +
     `<h2>Beginopstelling</h2><p><b>Keeper:</b> ${esc(k0 ? name(k0) : 'geen')}<br>` +
     `<b>Veld:</b> ${esc(list(on0.filter(id => id !== k0)))}<br><b>Wissels:</b> ${esc(list(m.present.filter(id => !on0.includes(id))))}</p>` +
@@ -299,7 +299,7 @@ $('#teamSel').onchange = e => { db.team = e.target.value; cur = null; render(); 
 $('#teamCat').onchange = e => {
   const k = e.target.value, old = sorted().filter(m => cat(m) !== CATS[k]);
   team().cat = k;
-  if (old.length && confirm(`Ook de ${old.length} bestaande wedstrijd(en) omzetten naar ${k}? Hun wisselschema wordt opnieuw gemaakt.`))
+  if (old.length && confirm(`Ook bestaande wedstrijden (${old.length}) omzetten naar ${k}? De app maakt hun wisselschema’s opnieuw.`))
     old.forEach(m => { setCat(m, k); generate(m, history(m)); });
   render();
 };
@@ -374,7 +374,7 @@ $('#import').onchange = async e => {
   let data;
   try { data = JSON.parse(await file.text()); } catch { data = null; }
   if (!Array.isArray(data?.teams) || !Array.isArray(data?.matches)) { alert('Dit is geen geldig back-upbestand.'); return; }
-  if (!confirm(`Back-up met ${data.teams.length} team(s) en ${data.matches.length} wedstrijd(en) terugzetten? De huidige gegevens worden vervangen.`)) return;
+  if (!confirm(`Deze back-up terugzetten? Aantal teams: ${data.teams.length}. Aantal wedstrijden: ${data.matches.length}. Dit vervangt alle huidige teams en wedstrijden in deze browser.`)) return;
   db = data; db.team ??= db.teams[0]?.id; cur = null;
   render();
 };
