@@ -1,13 +1,13 @@
 // Wisselschema-logica. Werkt in de browser (globals) en in Node (tests).
 // KNVB-wedstrijdvormen seizoen 2026/'27. Een blok loopt tot de time-out of rust; de keeper wisselt alleen op een blokgrens.
 const CATS = {
-  JO7:  { field: 4, keeper: false, blocks: 6, block: 7.5,  label: 'JO7 – 4 tegen 4, 3 x 15 min, geen keeper' },
-  JO8:  { field: 6, keeper: true,  blocks: 4, block: 10,   label: 'JO8 – 6 tegen 6, 2 x 20 min' },
-  JO9:  { field: 6, keeper: true,  blocks: 4, block: 10,   label: 'JO9 – 6 tegen 6, 2 x 20 min' },
-  JO10: { field: 6, keeper: true,  blocks: 4, block: 12.5, label: 'JO10 – 6 tegen 6, 2 x 25 min' },
-  JO11: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'JO11 – 8 tegen 8, 2 x 30 min' },
-  MO11: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'MO11 – 8 tegen 8, 2 x 30 min' },
-  JO12: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'JO12 – 8 tegen 8, 2 x 30 min' },
+  JO7:  { field: 4, keeper: false, blocks: 6, block: 7.5,  label: 'JO7: 4 tegen 4, 3 x 15 min, geen keeper' },
+  JO8:  { field: 6, keeper: true,  blocks: 4, block: 10,   label: 'JO8: 6 tegen 6, 2 x 20 min' },
+  JO9:  { field: 6, keeper: true,  blocks: 4, block: 10,   label: 'JO9: 6 tegen 6, 2 x 20 min' },
+  JO10: { field: 6, keeper: true,  blocks: 4, block: 12.5, label: 'JO10: 6 tegen 6, 2 x 25 min' },
+  JO11: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'JO11: 8 tegen 8, 2 x 30 min' },
+  MO11: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'MO11: 8 tegen 8, 2 x 30 min' },
+  JO12: { field: 8, keeper: true,  blocks: 4, block: 15,   label: 'JO12: 8 tegen 8, 2 x 30 min' },
 };
 const cat = m => CATS[m.cat] || CATS.JO9;
 const intervals = c => [c.block / 2, c.block]; // wisselen per half blok of per blok
