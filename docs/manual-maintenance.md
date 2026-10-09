@@ -1,6 +1,6 @@
 # Manual maintenance and acceptance
 
-`uitleg.html` is a standalone Dutch manual, linked above the app's first card. It deliberately uses the existing system font, pale green background, white cards and green controls. There are no scripts, external fonts, external images or new runtime dependencies. Deploy the three HTML/JS files and the complete `assets/` directory together; the Dockerfile copies these explicitly.
+`uitleg.html` is a standalone Dutch manual, linked above the app's first card. The app and manual share the approved green primary (`#006948`), pale lavender surface, system font, bordered white cards and local PupillenTrainer logo. There are no scripts in the manual, external fonts, external images or new runtime dependencies. Deploy the three HTML/JS files and the complete `assets/` directory together; the Dockerfile copies these explicitly.
 
 ## Local checks
 
@@ -30,6 +30,28 @@ Do not run the local HTTP server and Compose on the same port simultaneously. No
 The seven committed PNGs are targeted captures of the actual app, populated through browser interactions in an isolated context with **only fictional data**: Voorbeeldteam JO9, Speler A through H, Voorbeeldclub, example match date 2026-10-17. Speler H is marked absent; different keepers are chosen for the four blocks. The schema image follows a real cell edit and paired repair; the field image follows selecting period 5 and a real pointer drag. Number badges, outlines and leaders are added to the captures, without replacing app content. The date input's displayed format is browser/locale-dependent.
 
 For updates, use fixed desktop viewport 1100×1000 and Dutch browser locale. Seed the isolated browser context's `Math.random` (LCG, seed 42, multiplier 1664525, increment 1013904223, unsigned 32-bit state) so regenerated proposals are repeatable without changing production code. Two successive captures were verified byte-identical. Capture each target card, crop the match card before the schedule, and keep callouts outside text. Inspect every resulting image after regeneration. Do not use production browser storage, names or matches. Images open directly with a native link; browser Back returns to the manual. Each has Dutch alt text and a caption, while complete instructions remain text alongside the image so small-screen users need not read scaled screenshot text.
+
+## Repeatable capture and visual verification
+
+Use an external Python tooling environment with Playwright and Pillow, plus an existing full Chromium executable. These are maintenance dependencies only; do not add them to the runtime image. From the checkout root:
+
+```sh
+PYTHON=/path/to/tooling/bin/python
+CHROMIUM=/path/to/chromium/chrome
+EVIDENCE=/path/outside/the/checkout
+BASELINE=/path/to/read-only/baseline-checkout
+"$PYTHON" scripts/prepare-logo.py --chromium "$CHROMIUM" --evidence "$EVIDENCE/branding"
+"$PYTHON" scripts/capture-manual.py --chromium "$CHROMIUM" --output "$EVIDENCE/capture-one"
+"$PYTHON" scripts/capture-manual.py --chromium "$CHROMIUM" --output "$EVIDENCE/capture-two"
+"$PYTHON" scripts/verify-design.py --chromium "$CHROMIUM" --baseline "$BASELINE" --output "$EVIDENCE/design"
+node --test
+```
+
+Compare the two capture-results JSON files and all seven hashes before replacing `assets/manual/*.png`. Inspect every changed image, including full-resolution panels of tall pages. The capture script reuses the original fictional fixture and real cell edit/pointer drag. All three tools bind an ephemeral loopback port, intercept external requests, use isolated browser contexts and verify their temporary port is closed afterward.
+
+`verify-design.py` inventories all static Dutch text and non-styling attributes against the baseline; its only approved addition is the decorative header logo. It verifies the production JavaScript byte-for-byte, hidden states, 320/375px phone and landscape layouts, local table scrolling/sticky names, enlarged text, field geometry, two bench rows, real pointer crossing, keeper protection, JSON download/restore, print output and all manual anchors/image links/keyboard navigation. Also run the existing `verify-match-persistence.py` and `verify-bench-rotation.py` with the same `--chromium` and evidence paths.
+
+The authoritative logo remains `logo/logo.svg`. It contains two embedded PNGs, not a lightweight vector. `prepare-logo.py` rejects scripts, event handlers and external resources, then renders the full logo at 640×588 with transparency. The header uses `assets/branding/logo.webp`, lossless including transparent RGB (`exact=True`); decoded RGBA bytes must match the source render. The full shield and wordmark remain unchanged, without a matte, crop, distortion or recoloring. The existing Docker `assets/` copy includes it without changing Docker configuration.
 
 ## Acceptance checklist
 
