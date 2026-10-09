@@ -1,31 +1,31 @@
-# Onderzoek: voorbereide wedstrijden bewaren
+# Investigation: preserving prepared matches
 
-Onderzocht op `main` (`1affda307686e9201c94f445b89d74e050d2bcb4`) in lokale Chromium-sessies met fictieve gegevens. Roberts gebruikte URL en browser zijn niet bekend; dit is geen diagnose van zijn draaiende versie.
+Investigated on `main` (`1affda307686e9201c94f445b89d74e050d2bcb4`) in local Chromium sessions with fictional data. Robert's deployed URL and browser are unknown; this is not a diagnosis of his running version.
 
-## Wat al werkte
+## What already worked
 
-Vijf wedstrijden met verschillende datums en tegenstanders bleven afzonderlijk bewaard, inclusief aanwezigheid, keepers, interval, handmatig aangepaste schema's en versleepte posities. Wisselen en herladen veranderden de opgeslagen records niet. Een wijziging in één wedstrijd liet de andere vier ongemoeid. Ook 25 wedstrijden bleven na herladen bewaard.
+Five matches with different dates and opponents remained independently stored, including attendance, keepers, intervals, manually edited schedules and dragged positions. Switching matches and reloading left the stored records unchanged. Editing one match left the other four untouched. A further check retained 25 matches after reloading.
 
-De app had en heeft geen vast maximum aantal wedstrijden. Browseropslag is wel eindig. De bestaande lijst past bij 25 wedstrijden binnen een scherm van 375 pixels breed; knoppen lopen door op volgende regels.
+The app had and still has no fixed match-count limit. Browser storage is finite, however. The existing list fits within a 375-pixel-wide viewport with 25 matches; buttons wrap onto additional lines.
 
-Na herladen is geen wedstrijd geselecteerd. De opgeslagen wedstrijden staan nog in de lijst. Wedstrijden met dezelfde datum zonder tegenstander hebben dezelfde zichtbare knoptekst. Dat kan verwarrend zijn, maar de normale test toonde daarbij geen verlies van records. Deze PR verandert die weergave niet.
+No match is selected after reloading. The saved matches are still listed. Matches with the same date and no opponent have identical visible button labels. That can be confusing, but the normal test showed no record loss. This PR leaves that display behavior unchanged.
 
-## Aangetoonde fouten en gerichte oplossingen
+## Reproduced defects and targeted fixes
 
-1. **Tegenstander nog in invoer:** typen en onmiddellijk herladen, zonder het veld te verlaten, verloor de nieuwe tekst. De app bewaarde dit veld pas bij `change`. Datum en tegenstander worden nu ook bij `input` opgeslagen, zonder de invoer opnieuw te tekenen. Het datumveld committeerde in de onderzochte Chromium al tijdens invullen; de extra handler bewaakt beide invoervelden.
-2. **Gelijke klokticks:** 100 aanroepen van de echte aanmaak-handler met een vaste `Date.now()` leverden 100 records met één gedeeld ID op. Selecteren/bewerken zoekt het eerste record met dat ID, waardoor het verkeerde record wordt aangepast. Nieuwe IDs krijgen alleen bij een botsing een vrije suffix. Bestaande IDs worden niet gewijzigd.
-3. **Verouderd tweede tabblad:** open twee tabbladen, bereid een wedstrijd voor in het eerste, maak vervolgens een wedstrijd in het tweede. Het tweede schreef zijn oude volledige database terug en verwijderde de voorbereiding uit de opslag. Vóór opslaan controleert de app nu of de opgeslagen snapshot nog overeenkomt. Bij een conflict blijft de nieuwste opslag intact, verschijnt een waarschuwing en herlaadt het tabblad. De geweigerde laatste wijziging moet opnieuw worden gedaan.
+1. **Opponent input still focused:** typing and immediately reloading without leaving the field lost the new text. The app saved this field only on `change`. Date and opponent now also save on `input`, without redrawing the inputs. In the tested Chromium version, filling the date field already committed its value; the additional handler covers both fields.
+2. **Identical clock ticks:** 100 calls to the actual creation handler with a fixed `Date.now()` produced 100 records sharing one ID. Selection and editing find the first record with that ID, so the wrong record is changed. New IDs receive an unused suffix only when a collision occurs. Existing IDs are not changed.
+3. **Stale second tab:** opening two tabs, preparing a match in the first and then creating a match in the second caused the second tab to write its old full database back, removing the preparation from storage. Before saving, the app now checks whether the stored snapshot still matches. On conflict, it leaves the latest storage intact, shows a warning and reloads the tab. The rejected last edit must be repeated.
 
-De tabbladcontrole is een bescherming tegen een reeds verouderde snapshot, geen synchronisatie- of transactiesysteem. Exact gelijktijdige schrijfacties tussen de controle en `setItem` zijn niet atomair vergrendeld. Gebruik één actief bewerkingstabblad. Er is geen backend toegevoegd, geen migratie of verwijdering van records, en de sleutel `wissels-jo9` en het JSON-formaat blijven hetzelfde. Eventuele al aanwezige dubbele IDs worden niet automatisch gerepareerd.
+The tab check guards against an already stale snapshot; it is not a synchronization or transaction system. Exactly concurrent writes between the check and `setItem` are not protected by an atomic lock. Use one active editing tab. No backend, migration or record deletion was added, and the `wissels-jo9` key and JSON format remain unchanged. Existing duplicate IDs are not automatically repaired.
 
-## Verificatie
+## Verification
 
-- Iedere fout had een falende Node-regressietest vóór de bijbehorende oplossing.
-- `node --test` voert de volledige bestaande en nieuwe tests uit.
-- `matches.test.js` controleert 100 afzonderlijk benoemde voorbereidingen bij dezelfde kloktick, herladen, één record wijzigen zonder de andere 99 te wijzigen, invoer zonder blur en verouderde tabbladopslag.
-- `scripts/verify-match-persistence.py` gebruikt de echte app met geïsoleerde browseropslag, vijf volledige voorbereidingen, 25 normale aanmaakacties, 100 aanmaakacties bij gelijke klokticks, invoer/herladen en twee tabbladen. Het controleert opgeslagen JSON naast de zichtbare invoer en maakt screenshots. De tijdelijke lokale server sluit aan het eind.
+- Each defect had a failing Node regression test before its corresponding fix.
+- `node --test` runs the full existing and new test suite.
+- `matches.test.js` checks 100 separately named preparations within the same clock tick, reloading, editing one record without changing the other 99, input without blur and stale-tab storage.
+- `scripts/verify-match-persistence.py` exercises the actual app with isolated browser storage: five complete preparations, 25 normal creations, 100 same-clock creations, input/reload and two tabs. It checks stored JSON as well as visible inputs and captures screenshots. The temporary local server shuts down at the end.
 
-Benodigd voor de optionele browsercontrole: Python met `playwright` en een bestaande Chromium-installatie. Voorbeeld vanuit de repository:
+The optional browser check requires Python with `playwright` and an existing Chromium installation. Example from the repository:
 
 ```sh
 python scripts/verify-match-persistence.py \
@@ -33,4 +33,4 @@ python scripts/verify-match-persistence.py \
   --output /pad/buiten/de/repository/bewijs
 ```
 
-Met `--root /pad/naar/ongewijzigde/main --baseline` bevestigt dezelfde controle de fouten op de oude versie. Er is geen CI-workflow toegevoegd, geen merge uitgevoerd en niets gedeployd. Statistieken en eerlijkheidsberekeningen vallen buiten deze wijziging.
+With `--root /pad/naar/ongewijzigde/main --baseline`, the same check confirms the defects on the old version. No CI workflow was added, this PR has not been merged and nothing has been deployed. Statistics and fairness calculations are outside this change.

@@ -58,7 +58,18 @@ try:
   # Independent fresh context to avoid cross-tab contamination of other probes.
   def fresh():
    c=browser.new_context();pg=c.new_page();pg.on('pageerror',lambda e:errors.append(str(e)));pg.goto(base+'/index.html');pg.fill('#tname','Fictief testteam');pg.locator('#addTeam button').click();return c,pg
-  cc,collision=fresh();collision.evaluate('Date.now=()=>1234567890000; for(let i=0;i<100;i++)document.querySelector("#newMatch").click()');records=data(collision)['matches'];results['100_same_tick_matches']={'count':len(records),'unique_ids':len({m['id'] for m in records})};assert len(records)==100;assert len({m['id'] for m in records})==(1 if BASELINE else 100);cc.close()
+  cc,collision=fresh();collision.evaluate('Date.now=()=>1234567890000; for(let i=0;i<100;i++)document.querySelector("#newMatch").click()');records=data(collision)['matches'];results['100_same_tick_matches']={'count':len(records),'unique_ids':len({m['id'] for m in records})};assert len(records)==100;assert len({m['id'] for m in records})==(1 if BASELINE else 100)
+  if not BASELINE:
+   for i,m in enumerate(records):
+    collision.click(f'[data-m="{m["id"]}"]');collision.fill('#mOpp',f'Fictieve klokclub {i+1}');collision.fill('#mDate',f'2026-12-{i%28+1:02d}');collision.locator('#mDate').press('Tab')
+   prepared_collision=data(collision);collision.reload();assert data(collision)==prepared_collision
+   target=prepared_collision['matches'][50];collision.click(f'[data-m="{target["id"]}"]');collision.fill('#mOpp','Fictieve enkel gewijzigde klokclub');collision.reload();after_collision=data(collision)
+   assert after_collision['matches'][50]['opponent']=='Fictieve enkel gewijzigde klokclub'
+   assert after_collision['matches'][:50]+after_collision['matches'][51:]==prepared_collision['matches'][:50]+prepared_collision['matches'][51:]
+   results['100_same_tick_matches'].update({'distinct_opponents':len({m['opponent'] for m in prepared_collision['matches']}),'full_records_preserved_on_reload':True,'single_edit_other_99_unchanged':True})
+   (OUT/'100-prepared-matches.json').write_text(json.dumps(prepared_collision,indent=2))
+   (OUT/'100-after-single-edit.json').write_text(json.dumps(after_collision,indent=2))
+  cc.close()
   tc,firsttab=fresh();stale=tc.new_page();stale.on('pageerror',lambda e:errors.append(str(e)));stale.goto(base+'/index.html');firsttab.click('#newMatch');firsttab.fill('#mOpp','Fictief voorbereid in tab 1');firsttab.locator('#mOpp').press('Tab');prepared=data(firsttab);dialogs=[]
   def accept(d):dialogs.append(d.message);d.accept()
   stale.on('dialog',accept);stale.click('#newMatch')
