@@ -40,7 +40,7 @@ docker run -d --name wissels -p 8080:80 --restart unless-stopped wissels
 
 ## Deployen zonder Docker
 
-Omdat het een statische site is, kun je `index.html` en `schedule.js` ook op elke webserver of statische host zetten (nginx, Apache, GitHub Pages, Netlify, ...). Beide bestanden moeten in dezelfde map staan.
+Omdat het een statische site is, kun je `index.html`, `schedule.js`, `uitleg.html` en de volledige map `assets/` ook op elke webserver of statische host zetten (nginx, Apache, GitHub Pages, Netlify, ...). Houd de mapstructuur intact.
 
 ## Let op: gegevens
 
