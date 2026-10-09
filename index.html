@@ -219,7 +219,7 @@ const KEEPER_POS = [50, 71], DEFAULT_POS = { // startplekken veldspelers per spe
   6: [[25, 58], [75, 58], [50, 42], [28, 20], [72, 20], [50, 10]],
   8: [[20, 58], [50, 60], [80, 58], [25, 36], [75, 36], [50, 28], [50, 10], [50, 46]],
 };
-let stored = localStorage.getItem(KEY), storageConflict = false;
+let stored = localStorage.getItem(KEY), storageConflict = false, storageReadFailed = false;
 let db = JSON.parse(stored || '{"teams":[],"matches":[]}');
 db = upgradeLegacy(db);
 let cur = null, slot = 0, dragged = null, modePeriod = 0, modeMatch = null;
@@ -234,7 +234,15 @@ const sorted = () => db.matches.filter(m => m.teamId === db.team).sort((a, b) =>
 const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)).filter(x => matchStatus(x).value === 'played'); };
 const storageCurrent = () => {
   if (storageConflict) return false;
-  if (localStorage.getItem(KEY) !== stored) {
+  storageReadFailed = false;
+  let current;
+  try { current = localStorage.getItem(KEY); }
+  catch {
+    storageReadFailed = true;
+    alert('De browseropslag is niet beschikbaar. We kunnen niet controleren of een ander tabblad de gegevens heeft gewijzigd. Deze bewerking is gestopt zonder gegevens op te slaan of te vervangen. Probeer opnieuw zodra de browseropslag beschikbaar is.');
+    return false;
+  }
+  if (current !== stored) {
     storageConflict = true;
     alert('Een ander tabblad heeft de gegevens gewijzigd. Deze laatste wijziging is niet opgeslagen. We laden de nieuwste gegevens; voer je wijziging daarna opnieuw in.');
     window.location.reload();
@@ -529,7 +537,7 @@ function downloadBackup(track = true) {
     db = { ...db, backup: { lastExportAt: new Date().toISOString(), playedAtExport: playedCount() } };
     const saved = save(false);
     if (!saved) db = previous;
-    if (storageConflict) return false;
+    if (storageConflict || storageReadFailed) return false;
     if (!saved) alert('De back-up wordt gedownload, maar de downloadtijd is niet opgeslagen: de browseropslag is vol of niet beschikbaar. Controleer of het bestand veilig is opgeslagen.');
     renderBackup();
   }

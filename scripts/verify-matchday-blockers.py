@@ -25,10 +25,11 @@ results, snapshots = [], {}
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=args.chromium, args=['--no-sandbox'])
-        for case in ['inherited IDs', 'quota download and restore', 'stale downloads', 'legacy tails', 'pointer undo']:
+        for case in ['inherited IDs', 'quota download and restore', 'quota pending input', 'storage read errors', 'stale downloads', 'legacy tails', 'pointer undo']:
             fixture = make_fixture(ids if case == 'inherited IDs' else ['p0', 'p1', 'p2', 'p3', 'p4'])
             keeper_id, field_id, tap_id = fixture['matches'][0]['present'][:3]
-            if case == 'quota download and restore':
+            if case in ['quota download and restore', 'quota pending input', 'storage read errors']:
+                fixture['backup'] = {'lastExportAt': '2026-09-01T12:00:00Z', 'playedAtExport': 1}
                 second_team = json.loads(json.dumps(fixture['teams'][0]))
                 second_team.update(id='t2', name='Second fictional team')
                 fixture['teams'].append(second_team)
@@ -80,28 +81,74 @@ try:
                     page.locator('[data-m="m"]').click()
                     assert data() == fixture
                     page.locator('#boardSec').screenshot(path=str(args.output / 'inherited-ids.png'))
-                elif case == 'quota download and restore':
+                elif case in ['quota download and restore', 'quota pending input']:
+                    page.click('#matchModeBtn')
+                    selection = page.evaluate('[cur, slot, modeMatch, modePeriod, document.querySelector("#modeSec").hidden]')
+                    stored_bytes = page.evaluate("localStorage.getItem('wissels-jo9')")
+                    backup_label = page.locator('#backupTime').inner_text()
                     page.evaluate("() => { Storage.prototype.setItem = function(){throw new DOMException('full','QuotaExceededError')}; }")
+                    pending = json.loads(json.dumps(fixture))
+                    if case == 'quota pending input':
+                        page.fill('#mOpp', 'Unsaved fictional input')
+                        pending['matches'][0]['opponent'] = 'Unsaved fictional input'
                     with page.expect_download() as event:
                         page.click('#export')
-                    path = args.output / 'quota-download.json'
+                    path = args.output / f'{case}-download.json'
                     event.value.save_as(path)
-                    assert json.loads(path.read_text()) == fixture
-                    assert data() == memory() == fixture
-                    assert 'Nog geen' in page.locator('#backupTime').inner_text()
+                    assert path.read_text() == page.evaluate('JSON.stringify(db, null, 2)')
+                    assert json.loads(path.read_text()) == pending
+                    assert data() == fixture and memory() == pending
+                    assert page.evaluate("localStorage.getItem('wissels-jo9')") == stored_bytes
+                    assert page.locator('#backupTime').inner_text() == backup_label
                     assert 'niet opgeslagen' in dialogs[-1]
                     replacement = json.loads(json.dumps(fixture))
                     replacement['teams'][0]['name'] = 'Replacement'
                     with page.expect_download() as offered:
                         upload(replacement, [True, True])
-                    offered_path = args.output / 'quota-before-restore.json'
+                    offered_path = args.output / f'{case}-before-restore.json'
                     offered.value.save_as(offered_path)
-                    assert json.loads(offered_path.read_text()) == fixture
-                    assert data() == memory() == fixture
-                    assert page.evaluate('cur') == 'm'
-                    page.locator('section:has(#export)').screenshot(path=str(args.output / 'quota-backup.png'))
+                    assert offered_path.read_bytes() == path.read_bytes()
+                    assert data() == fixture and memory() == pending
+                    assert page.evaluate("localStorage.getItem('wissels-jo9')") == stored_bytes
+                    assert page.evaluate('[cur, slot, modeMatch, modePeriod, document.querySelector("#modeSec").hidden]') == selection
+                    assert 'niet opgeslagen' in dialogs[-1]
+                    snapshots[case + ' memory'] = memory()
+                    page.locator('section:has(#export)').screenshot(path=str(args.output / f'{case}-backup.png'))
                     page.reload()
                     assert data() == fixture
+                elif case == 'storage read errors':
+                    page.click('#matchModeBtn')
+                    selection = page.evaluate('[cur, slot, modeMatch, modePeriod, document.querySelector("#modeSec").hidden]')
+                    stored_bytes = page.evaluate("localStorage.getItem('wissels-jo9')")
+                    page.evaluate('() => { window.originalGetItem = Storage.prototype.getItem; }')
+                    def original_bytes():
+                        return page.evaluate("originalGetItem.call(localStorage, 'wissels-jo9')")
+                    for fail_at in [1, 2]:
+                        page.evaluate("n => { let reads=0; Storage.prototype.getItem=function(key){ if(++reads>=n)throw new DOMException('denied','SecurityError'); return originalGetItem.call(this,key); }; }", fail_at)
+                        assert page.evaluate('downloadBackup()') is False
+                        assert not downloads
+                        assert memory() == fixture and original_bytes() == stored_bytes
+                        assert 'browseropslag is niet beschikbaar' in dialogs[-1]
+                        assert 'wordt gedownload' not in dialogs[-1]
+                    page.evaluate("() => { Storage.prototype.getItem=function(){throw new DOMException('denied','SecurityError')}; }")
+                    assert page.evaluate('downloadBackup(false)') is False
+                    replacement = json.loads(json.dumps(fixture))
+                    replacement['teams'][0]['name'] = 'Replacement'
+                    for safety in [False, True]:
+                        upload(replacement, [safety, True])
+                        assert not downloads
+                        assert memory() == fixture and original_bytes() == stored_bytes
+                        assert page.evaluate('[cur, slot, modeMatch, modePeriod, document.querySelector("#modeSec").hidden]') == selection
+                        assert 'browseropslag is niet beschikbaar' in dialogs[-1]
+                    snapshots[case + ' memory'] = memory()
+                    page.locator('section:has(#export)').screenshot(path=str(args.output / 'storage-read-errors.png'))
+                    page.evaluate('() => { Storage.prototype.getItem=originalGetItem; }')
+                    assert data() == fixture
+                    with page.expect_download() as recovered:
+                        assert page.evaluate('downloadBackup(false)') is True
+                    recovered_path = args.output / 'read-access-recovered.json'
+                    recovered.value.save_as(recovered_path)
+                    assert recovered_path.read_text() == page.evaluate('JSON.stringify(db, null, 2)')
                 elif case == 'stale downloads':
                     # Each download path gets a fresh stale tab and a distinct complete live record.
                     for track in [True, False]:
@@ -178,4 +225,4 @@ finally:
 (args.output / 'results.json').write_text(json.dumps(results, indent=2))
 (args.output / 'storage-snapshots.json').write_text(json.dumps(snapshots, indent=2))
 print(json.dumps(results, indent=2))
-assert len(results) == 5 and all(r['passed'] for r in results)
+assert len(results) == 7 and all(r['passed'] for r in results)
