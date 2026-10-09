@@ -126,7 +126,8 @@ const KEEPER_POS = [50, 71], DEFAULT_POS = { // startplekken veldspelers per spe
   6: [[25, 58], [75, 58], [50, 42], [28, 20], [72, 20], [50, 10]],
   8: [[20, 58], [50, 60], [80, 58], [25, 36], [75, 36], [50, 28], [50, 10], [50, 46]],
 };
-let db = JSON.parse(localStorage.getItem(KEY) || '{"teams":[],"matches":[]}');
+let stored = localStorage.getItem(KEY), storageConflict = false;
+let db = JSON.parse(stored || '{"teams":[],"matches":[]}');
 if (db.players) { // oude opslag zonder teams: zet alles in één team, keeperlijst wordt keeper per kwart
   const t = { id: 't' + Date.now().toString(36), name: 'Mijn team', players: db.players };
   db = { teams: [t], team: t.id, matches: db.matches.map(m => ({ ...m, teamId: t.id,
@@ -142,7 +143,19 @@ const name = id => db.teams.flatMap(t => t.players).find(p => p.id === id)?.name
 const match = () => db.matches.find(m => m.id === cur);
 const sorted = () => db.matches.filter(m => m.teamId === db.team).sort((a, b) => a.date.localeCompare(b.date));
 const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)); };
-const save = () => localStorage.setItem(KEY, JSON.stringify(db));
+const save = () => {
+  if (storageConflict) return false;
+  if (localStorage.getItem(KEY) !== stored) {
+    storageConflict = true;
+    alert('Een ander tabblad heeft de gegevens gewijzigd. Deze laatste wijziging is niet opgeslagen. We laden de nieuwste gegevens; voer je wijziging daarna opnieuw in.');
+    window.location.reload();
+    return false;
+  }
+  const next = JSON.stringify(db);
+  localStorage.setItem(KEY, next);
+  stored = next;
+  return true;
+};
 const regen = m => { generate(m, history(m)); slot = 0; };
 // Minuten tonen: hele minuten als getal, anders m:ss (bv. 6:15 bij JO10)
 const fmt = x => Number.isInteger(x) ? String(x) : `${Math.floor(x)}:${String(Math.round(x % 1 * 60)).padStart(2, '0')}`;
@@ -156,7 +169,7 @@ function setCat(m, k) {
 }
 
 function render() {
-  save();
+  if (!save()) return;
   $('#teamSel').innerHTML = db.teams.map(t =>
     `<option value="${t.id}" ${t.id === db.team ? 'selected' : ''}>${esc(t.name)}</option>`).join('') || '<option>Nog geen team</option>';
   document.querySelectorAll('.needTeam').forEach(s => s.hidden = !team());
@@ -312,7 +325,10 @@ $('#players').onclick = e => {
 
 // Wedstrijden
 $('#newMatch').onclick = () => {
-  const m = { id: Date.now().toString(36), teamId: db.team, date: new Date().toISOString().slice(0, 10), opponent: '',
+  const baseId = Date.now().toString(36);
+  let id = baseId, suffix = 1;
+  while (db.matches.some(m => m.id === id)) id = `${baseId}-${suffix++}`;
+  const m = { id, teamId: db.team, date: new Date().toISOString().slice(0, 10), opponent: '',
               present: players().map(p => p.id), slots: [], keeperBySlot: [], pos: {} };
   setCat(m, team().cat ?? 'JO9');
   db.matches.push(m); cur = m.id; regen(m); render();
@@ -323,6 +339,8 @@ $('#delMatch').onclick = () => {
 };
 $('#gen').onclick = () => { regen(match()); render(); };
 $('#printBtn').onclick = () => window.print();
+$('#mDate').oninput = e => { match().date = e.target.value; save(); };
+$('#mOpp').oninput = e => { match().opponent = e.target.value; save(); };
 $('#mDate').onchange = e => { match().date = e.target.value; render(); };
 $('#mOpp').onchange = e => { match().opponent = e.target.value; render(); };
 $('#mInt').onchange = e => { const m = match(); m.interval = +e.target.value; regen(m); render(); };
