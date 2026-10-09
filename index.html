@@ -232,7 +232,7 @@ const name = id => players().find(p => p.id === id)?.name ?? '?';
 const match = () => db.matches.find(m => m.id === cur);
 const sorted = () => db.matches.filter(m => m.teamId === db.team).sort((a, b) => a.date.localeCompare(b.date));
 const history = m => { const s = sorted(); return s.slice(0, s.indexOf(m)).filter(x => matchStatus(x).value === 'played'); };
-const save = () => {
+const storageCurrent = () => {
   if (storageConflict) return false;
   if (localStorage.getItem(KEY) !== stored) {
     storageConflict = true;
@@ -240,8 +240,13 @@ const save = () => {
     window.location.reload();
     return false;
   }
+  return true;
+};
+const save = (report = true) => {
+  if (!storageCurrent()) return false;
   const next = JSON.stringify(db);
-  localStorage.setItem(KEY, next);
+  try { localStorage.setItem(KEY, next); }
+  catch { if (report) alert('De gegevens zijn niet opgeslagen: de browseropslag is vol of niet beschikbaar. Download een back-up om je gegevens te bewaren.'); return false; }
   stored = next;
   return true;
 };
@@ -374,7 +379,7 @@ function renderBoard(m) {
   document.querySelectorAll('.token').forEach(t => t.remove());
   const on = m.slots[slot] || [], k = m.keeperBySlot[slot];
   const bench = m.present.filter(id => !on.includes(id));
-  const display = { ...m, pos: JSON.parse(JSON.stringify(m.pos)) };
+  const display = { ...m, pos: Object.assign(Object.create(null), m.pos) };
   place(display, on, k);
   const tokens = on.map(id => [id, id === k ? (display.pos.K || KEEPER_POS) : display.pos[id]])
     .concat(bench.map((id, i) => { // bij meer dan 5 wissels over twee rijen, anders liggen ze over elkaar
@@ -518,7 +523,16 @@ function renderBackup() {
   $('#backupReminder').hidden = playedCount() - (db.backup?.playedAtExport || 0) < 3;
 }
 function downloadBackup(track = true) {
-  if (track) { db.backup = { lastExportAt: new Date().toISOString(), playedAtExport: playedCount() }; if (!save()) return false; renderBackup(); }
+  if (!storageCurrent()) return false;
+  if (track) {
+    const previous = db;
+    db = { ...db, backup: { lastExportAt: new Date().toISOString(), playedAtExport: playedCount() } };
+    const saved = save(false);
+    if (!saved) db = previous;
+    if (storageConflict) return false;
+    if (!saved) alert('De back-up wordt gedownload, maar de downloadtijd is niet opgeslagen: de browseropslag is vol of niet beschikbaar. Controleer of het bestand veilig is opgeslagen.');
+    renderBackup();
+  }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
   a.download = `wissels-backup-${new Date().toISOString().slice(0, 10)}.json`;
@@ -535,7 +549,10 @@ $('#import').onchange = async e => {
   try { data = validateBackup(JSON.parse(await file.text())); } catch { alert('Dit is geen geldig back-upbestand. Er is niets vervangen. Controleer teams, spelers, wedstrijden en schema’s.'); return; }
   if (confirm('Eerst een back-up van je huidige gegevens downloaden? Daarna kun je het terugzetten nog annuleren.')) downloadBackup(false);
   if (!confirm(`Deze back-up terugzetten? Aantal teams: ${data.teams.length}. Aantal wedstrijden: ${data.matches.length}. Dit vervangt alle huidige teams en wedstrijden in deze browser.`)) return;
-  db = data; db.team ??= db.teams[0]?.id; cur = null; modeMatch = null; $('#modeSec').hidden = true;
+  const previous = db;
+  db = data; db.team ??= db.teams[0]?.id;
+  if (!save()) { db = previous; return; }
+  cur = null; modeMatch = null; $('#modeSec').hidden = true;
   render();
 };
 
@@ -546,7 +563,8 @@ $('#board').onpointerdown = e => {
   t.setPointerCapture(e.pointerId);
   const r = $('#board').getBoundingClientRect(), clamp = v => Math.min(97, Math.max(3, v));
   // afstand tussen vinger en midden van de speler, zodat die niet naar de vinger springt
-  const dx = e.clientX - r.left - parseFloat(t.style.left) / 100 * r.width, dy = e.clientY - r.top - parseFloat(t.style.top) / 100 * r.height;
+  const startX = parseFloat(t.style.left), startY = parseFloat(t.style.top);
+  const dx = e.clientX - r.left - startX / 100 * r.width, dy = e.clientY - r.top - startY / 100 * r.height;
   t.onpointermove = ev => {
     t.style.left = clamp((ev.clientX - dx - r.left) / r.width * 100) + '%';
     t.style.top = clamp((ev.clientY - dy - r.top) / r.height * 100) + '%';
@@ -555,10 +573,19 @@ $('#board').onpointerdown = e => {
   t.onpointerup = () => {
     t.onpointermove = t.onpointerup = t.onpointercancel = null;
     const m = match(), id = t.dataset.id, x = parseFloat(t.style.left), y = parseFloat(t.style.top), toField = y < PITCH_Y;
-    remember(m); m.manual = true;
-    if (id === m.keeperBySlot[slot]) { if (toField) m.pos.K = [x, y]; }
-    else if (toField) { if (!m.slots[slot].includes(id)) m.slots[slot].push(id); m.pos[id] = [x, y]; dragged = id; }
-    else { m.slots[slot] = m.slots[slot].filter(p => p !== id); delete m.pos[id]; }
+    const keeper = id === m.keeperBySlot[slot], key = keeper ? 'K' : id;
+    const pos = Object.hasOwn(m.pos, key) ? m.pos[key] : null;
+    const samePosition = pos && Math.abs(pos[0] - x) < 1e-9 && Math.abs(pos[1] - y) < 1e-9;
+    const stationary = Math.abs(startX - x) < 1e-9 && Math.abs(startY - y) < 1e-9;
+    const on = m.slots[slot].includes(id);
+    const changed = !stationary && (keeper ? toField && !samePosition :
+      toField ? !on || !samePosition : on || Object.hasOwn(m.pos, id));
+    if (changed) {
+      remember(m); m.manual = true;
+      if (keeper) m.pos.K = [x, y];
+      else if (toField) { if (!on) m.slots[slot].push(id); m.pos[id] = [x, y]; dragged = id; }
+      else { m.slots[slot] = m.slots[slot].filter(p => p !== id); delete m.pos[id]; }
+    }
     render();
   };
 };

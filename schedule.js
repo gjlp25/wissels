@@ -14,7 +14,7 @@ const intervals = c => [c.block / 2, c.block]; // wisselen per half blok of per 
 
 // Wedstrijd: { cat, present:[id], keepers:[id|null per blok], interval, slots:[[ids op veld incl. keeper]], keeperBySlot:[id|null] }
 function minutes(m) {
-  const r = {};
+  const r = Object.create(null);
   m.present.forEach(id => r[id] = 0);
   m.slots.forEach(on => on.forEach(id => { if (id in r) r[id] += m.interval; }));
   return r;
@@ -22,7 +22,7 @@ function minutes(m) {
 
 // Totalen over eerdere wedstrijden. diff = minuten t.o.v. wedstrijdgemiddelde (negatief = tekort).
 function stats(history) {
-  const s = {};
+  const s = Object.create(null);
   const get = id => s[id] ??= { matches: 0, minutes: 0, benchStarts: 0, keeper: 0, diff: 0 };
   history.filter(m => matchStatus(m).value === 'played' && m.slots.length).forEach(m => {
     const min = minutes(m), avg = m.present.reduce((t, id) => t + min[id], 0) / m.present.length;
@@ -120,10 +120,14 @@ function upgradeLegacy(input) {
 // Validate before replacing any browser state. Historical deleted-player references are allowed.
 function validateBackup(input) {
   const fail = () => { throw new Error('Dit is geen geldig back-upbestand: controleer teams, spelers, wedstrijden en schema’s.'); };
-  if (input?.teams === undefined && Array.isArray(input?.players) && (!Array.isArray(input.matches) || !input.matches.every(m => Array.isArray(m?.keepers)))) fail();
-  input = upgradeLegacy(input);
   const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
   const id = x => typeof x === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(x) && !['constructor', 'prototype', '__proto__'].includes(x);
+  // Check the original legacy list before cycling/truncating it to four blocks.
+  if (input?.teams === undefined && Array.isArray(input?.players)) {
+    if (!Array.isArray(input.matches) || !input.matches.every(m => object(m) && Array.isArray(m.present) && Array.isArray(m.keepers) &&
+      m.keepers.every(k => k === null || (id(k) && m.present.includes(k))))) fail();
+  }
+  input = upgradeLegacy(input);
   const ids = x => Array.isArray(x) && x.every(id) && new Set(x).size === x.length;
   const text = x => typeof x === 'string';
   if (!object(input) || !Array.isArray(input.teams) || !Array.isArray(input.matches)) fail();
