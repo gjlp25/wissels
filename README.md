@@ -56,4 +56,4 @@ node --test
 
 Runs the full generator, persistence, matchday, import and static-delivery suites. See `docs/matchday-improvements.md` for acceptance/compatibility decisions and `scripts/verify-matchday.py` for real-browser verification (external Playwright tooling required).
 
-Release 2026.10.2 adds shared system/light/dark appearance. See `docs/dark-mode.md` for behavior, browser/contrast evidence and the `scripts/verify-theme.py` acceptance command.
+Release 2026.10.3 provides two shared light/dark icon buttons, defaulting to light without following the OS. See `docs/dark-mode.md` for behavior, browser/contrast evidence and the `scripts/verify-theme.py` acceptance command.

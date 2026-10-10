@@ -84,14 +84,17 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
-<header><p><a class="button" href="index.html">Terug naar Wisselschema</a></p><div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Privacy &amp; gegevens</h1></div><div class="theme-control"><label for="themeChoice">Weergave</label><select id="themeChoice"><option value="system">Systeem</option><option value="light">Licht</option><option value="dark">Donker</option></select></div>
+<header><p><a class="button" href="index.html">Terug naar Wisselschema</a></p><div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Privacy &amp; gegevens</h1></div><div class="theme-control" role="group" aria-label="Weergave">
+<button type="button" data-theme-choice="light" aria-label="Licht" title="Licht" aria-pressed="true" disabled><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
+<button type="button" data-theme-choice="dark" aria-label="Donker" title="Donker" aria-pressed="false" disabled><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.9 13.1A9 9 0 0 1 10.9 3.1a9 9 0 1 0 10 10Z"/></svg></button>
+</div>
 </header>
 <main>
 <div class="intro"><p>PupillenTrainer helpt je teams en wisselschema’s voor te bereiden. Hieronder lees je wat deze versie met gegevens doet en hoe je ze zelf bewaart of verwijdert.</p><p><strong>Concept vóór publicatie:</strong> Robert wil de app op Vercel hosten. De live instellingen en de afspraken voor feedbackmail zijn nog niet vastgesteld. De uitleg over browseropslag hieronder beschrijft de app. Deze pagina is nog geen volledige privacyverklaring voor een specifieke live website.</p></div>
 <section><h2>Teams en wedstrijden in jouw browser</h2>
 <p>De app bewaart teamnamen, categorieën, spelersnamen en speler-ID’s, wedstrijden met datum en tegenstander, aanwezigheid, status, keeperkeuzes, schema’s, veldposities en de laatste herstelstap. Ook het gekozen team en gegevens over de laatste aangevraagde back-up worden bewaard.</p>
 <p>Dit staat in <strong>localStorage</strong>, onder de sleutel <code>wissels-jo9</code>. De app stuurt deze ingevoerde gegevens niet naar een app-server. Er is geen account en geen automatische synchronisatie. De app gebruikt deze opslag om je voorbereiding na opnieuw openen terug te tonen en totalen te berekenen.</p>
-<p>Je keuze voor Systeem, Licht of Donker wordt apart in localStorage bewaard onder <code>pupillentrainer-theme</code>. Deze weergavekeuze bevat geen team- of spelergegevens en zit niet in de JSON-back-up. Zonder eigen keuze volgt de app de instelling van je apparaat.</p>
+<p>Je keuze voor Licht of Donker wordt apart in localStorage bewaard onder <code>pupillentrainer-theme</code>. Deze weergavekeuze bevat geen team- of spelergegevens en zit niet in de JSON-back-up. Zonder geldige bewaarde keuze is de weergave licht; de app volgt niet de instelling van je apparaat.</p>
 <p>De appopslag is <strong>niet versleuteld</strong>. Iedereen met toegang tot hetzelfde browserprofiel kan de app openen en de gegevens bekijken. Gebruik liever korte herkenbare namen of initialen en voer geen medische of andere gevoelige informatie in.</p>
 <p>Elke browser en elk apparaat heeft aparte opslag. Ook het webadres telt mee: protocol (http of https), domein en poort bepalen samen welke opslag wordt gebruikt. Een ander adres kan dus een lege app tonen. In privémodus kan de opslag verdwijnen wanneer je het venster sluit.</p>
 <p>De app wist gegevens niet na een vaste tijd. Ze blijven bewaard tot je ze verwijdert of vervangt, of de browser de opslag wist. Lokale opslag is geen garantie dat gegevens altijd beschikbaar blijven.</p></section>
@@ -125,7 +128,7 @@
   <div class="footer-row">
     <p class="creator-credit">Gemaakt door Robert Postma · <a href="https://www.linkedin.com/in/robert-postma-6abb1a79" rel="noreferrer">LinkedIn</a></p>
     <nav aria-label="Footer"><a href="uitleg.html">Uitleg</a><a href="privacy.html">Privacy &amp; gegevens</a><a href="mailto:robert@wicaro.nl">Feedback</a></nav>
-    <small title="Release met lichte en donkere weergave">Versie 2026.10.2</small>
+    <small title="Release met lichte en donkere weergave">Versie 2026.10.3</small>
   </div>
   <p class="feedback-note">Feedback per e-mail. Stuur geen kindernamen of volledige back-ups.</p>
 </footer>

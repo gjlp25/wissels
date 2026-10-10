@@ -53,17 +53,27 @@ def contrast(page, theme, label):
                 color=el.evaluate("e=>getComputedStyle(e,'::placeholder').color.match(/[\\d.]+/g).map(Number).slice(0,3)")
                 r=ratio(color,v['bg']);assert r>=4.5,(theme,label,'placeholder',v)
                 contrasts.append({'theme':theme,'page':label,**v,'fg':color,'ratio':round(r,3),'kind':'placeholder'})
-    for selector in ['#themeChoice', '#tname', '#mOpp', '#mStatus']:
+    for selector in ['[data-theme-choice=light]', '[data-theme-choice=dark]', '#tname', '#mOpp', '#mStatus']:
         el=page.locator(selector)
         if el.count() and el.is_visible():
             v=el.evaluate(measure)
             r=ratio(v['border'],v['outside']);assert r>=3, (theme,selector,'border',v)
             ui_contrasts.append({'theme':theme,'selector':selector,'kind':'border','ratio':round(r,3)})
-    page.locator('#themeChoice').focus()
-    v=page.locator('#themeChoice').evaluate(measure)
-    assert page.locator('#themeChoice').evaluate('el=>getComputedStyle(el).outlineStyle')=='solid'
+    for el in page.locator('[data-theme-choice]').all():
+        box=el.bounding_box();assert box['width']>=44 and box['height']>=44
+        v=el.locator('svg').evaluate(measure)
+        r=ratio(v['fg'],v['bg']);assert r>=3,(theme,label,'icon',v)
+        ui_contrasts.append({'theme':theme,'page':label,'kind':'icon','ratio':round(r,3)})
+        assert el.locator('svg').get_attribute('aria-hidden')=='true'
+    active=page.locator('[data-theme-choice][aria-pressed=true]')
+    assert active.count()==1
+    assert active.evaluate('e=>getComputedStyle(e).boxShadow')!='none'
+    page.locator('[data-theme-choice=light]').focus()
+    page.keyboard.press('Tab')
+    v=page.locator('[data-theme-choice=dark]').evaluate(measure)
+    assert page.locator('[data-theme-choice=dark]').evaluate('el=>getComputedStyle(el).outlineStyle')=='solid'
     r=ratio(v['outline'],v['outside']);assert r>=3
-    ui_contrasts.append({'theme':theme,'selector':'#themeChoice','kind':'focus','ratio':round(r,3)})
+    ui_contrasts.append({'theme':theme,'selector':'[data-theme-choice=dark]','kind':'focus','ratio':round(r,3)})
 
 def db(page):
     return page.evaluate("localStorage.getItem('wissels-jo9')")
@@ -77,15 +87,25 @@ try:
     context.route('**/*',lambda r: r.continue_() if r.request.url.startswith(base+'/') else (external.append(r.request.url),r.abort()))
     context.add_init_script("""let seed=42; Math.random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296); window.themeWrites=[]; window.earlyTheme=[]; new MutationObserver(()=>{if(document.documentElement?.dataset.theme)window.earlyTheme.push({theme:document.documentElement.dataset.theme,state:document.readyState})}).observe(document,{subtree:true,attributes:true,attributeFilter:["data-theme"]}); const set=Storage.prototype.setItem; Storage.prototype.setItem=function(k,v){window.themeWrites.push(k);return set.call(this,k,v)};""")
     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
-    page.goto(base+'/index.html');theme(page,'dark')
-    assert page.evaluate('earlyTheme[0].theme')=='dark'
+    page.goto(base+'/index.html');theme(page,'light')
+    assert page.evaluate('earlyTheme[0].theme')=='light'
     assert page.evaluate('earlyTheme[0].state')=='loading'
-    assert page.get_by_label('Weergave').input_value()=='system'
+    assert page.get_by_role('group',name='Weergave').get_by_role('button').count()==2
     assert page.evaluate("localStorage.getItem('pupillentrainer-theme')") is None
-    page.emulate_media(color_scheme='light');theme(page,'light')
-    page.select_option('#themeChoice','dark');page.emulate_media(color_scheme='light');theme(page,'dark')
-    page.select_option('#themeChoice','system');theme(page,'light')
-    passed.append('system default/live changes, manual override and return to system')
+    assert page.evaluate("themeWrites.filter(k=>k==='pupillentrainer-theme')")==[]
+    # Native sequential keyboard navigation, not direct DOM click.
+    page.locator('[data-theme-choice=light]').focus()
+    page.keyboard.press('Tab')
+    assert page.locator('[data-theme-choice=dark]').evaluate('e=>e===document.activeElement')
+    page.keyboard.press('Enter');theme(page,'dark')
+    assert page.locator('[data-theme-choice=dark]').get_attribute('aria-pressed')=='true'
+    page.keyboard.press('Shift+Tab');page.keyboard.press('Space');theme(page,'light')
+    page.locator('[data-theme-choice=dark]').click();theme(page,'dark')
+    for os_choice in ['light','dark','light']:
+        page.emulate_media(color_scheme=os_choice);theme(page,'dark')
+    page.locator('[data-theme-choice=light]').click()
+    page.emulate_media(color_scheme='dark');theme(page,'light')
+    passed.append('exactly two native icon buttons, Tab/Enter/Space, pressed state, light first paint, OS changes ignored')
     page.fill('#tname','Fictief darkmodeteam');page.locator('#addTeam button').click()
     for letter in 'ABCDEFGH':
         page.fill('#pname','Speler '+letter);page.locator('#addPlayer button').click()
@@ -97,7 +117,7 @@ try:
     assert not page.locator('#undo').is_disabled()
     page.locator('#fairness').evaluate('e=>e.open=true');page.click('#matchModeBtn')
     # Compare existing light colors and pitch geometry to the unchanged inline CSS.
-    page.select_option('#themeChoice','light')
+    page.locator('[data-theme-choice=light]').click()
     parity_js="""() => [...document.querySelectorAll('section, section input, section select, section button, th, td, .token, .legend, #pitch, #bench, #board')].filter(e=>e.checkVisibility()).map(e=>{let s=getComputedStyle(e);return [e.id,e.className,...['color','backgroundColor','borderColor','width','height'].map(p=>s[p])]})"""
     light_styles=page.evaluate(parity_js)
     page.locator('link[href="theme.css"]').evaluate('e=>e.disabled=true')
@@ -105,33 +125,37 @@ try:
     page.locator('link[href="theme.css"]').evaluate('e=>e.disabled=false')
     passed.append('existing light computed colors/borders and pitch/token geometry exactly match baseline CSS')
     for choice in ['light','dark']:
-        page.select_option('#themeChoice',choice);theme(page,choice)
+        page.locator('[data-theme-choice='+choice+']').click();theme(page,choice)
         assert db(page)==saved
         contrast(page,choice,'app')
         for selector in ['#newMatch','#delTeam','.chip button','#schedule td.on','#schedule td.off','.slotbtn.active']:
             page.locator(selector).first.hover();contrast(page,choice,'hover:'+selector)
         page.mouse.move(0,0)
         for width,height in [(320,740),(375,812),(844,390),(1280,900)]:
+            page.evaluate('document.activeElement?.blur()')
             page.set_viewport_size({'width':width,'height':height})
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             page.evaluate('scrollTo(0,0)')
             if width in [375,1280]:
                 page.screenshot(path=str(a.output/f'app-{choice}-{width}-top.png'))
+                page.screenshot(path=str(a.output/f'app-{choice}-{width}-full.png'),full_page=True)
                 page.locator('#matchSec').screenshot(path=str(a.output/f'app-{choice}-{width}-schedule.png'))
                 page.locator('#boardSec').screenshot(path=str(a.output/f'app-{choice}-{width}-pitch.png'))
         passed.append(choice+': app text/control/focus contrast, hover states, 4 viewports, full DB unchanged')
     for name in ['uitleg.html','privacy.html','index.html']:
         page.goto(base+'/'+name);theme(page,'dark');assert db(page)==saved
-        assert page.get_by_label('Weergave').input_value()=='dark'
+        assert page.locator('[data-theme-choice=dark]').get_attribute('aria-pressed')=='true'
         if name=='index.html': page.locator(f'[data-m="{match}"]').click()
         for choice in ['light','dark']:
-            page.select_option('#themeChoice',choice);contrast(page,choice,name)
+            page.locator('[data-theme-choice='+choice+']').click();contrast(page,choice,name)
             if name!='index.html':assert page.evaluate('themeWrites.every(k=>k==="pupillentrainer-theme")')
             for width,height in [(320,740),(375,812),(844,390),(1280,900)]:
+                page.evaluate('document.activeElement?.blur()')
                 page.set_viewport_size({'width':width,'height':height})
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-                if choice=='dark' and width in [375,1280] and name!='index.html':
-                    page.evaluate('scrollTo(0,0)');page.screenshot(path=str(a.output/f'{name}-dark-{width}.png'))
+                if width in [375,1280] and name!='index.html':
+                    page.evaluate('scrollTo(0,0)');page.screenshot(path=str(a.output/f'{name}-{choice}-{width}.png'))
+                    page.screenshot(path=str(a.output/f'{name}-{choice}-{width}-full.png'),full_page=True)
                 page.add_style_tag(content='html { font-size:200%; }')
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 page.locator('head style').last.evaluate('e=>e.remove()')
@@ -146,24 +170,37 @@ try:
     passed.append('all pages remember choice/reload, informational theme-only writes, enlarged text, print light')
     # Existing tab receives real storage events; fresh tabs inherit stored preference.
     other=context.new_page();other.goto(base+'/privacy.html');theme(other,'dark')
-    page.select_option('#themeChoice','light');theme(other,'light')
-    other.select_option('#themeChoice','system');page.emulate_media(color_scheme='dark');theme(page,'dark')
-    other.evaluate("localStorage.setItem('pupillentrainer-theme','invalid')");page.reload();theme(page,'dark')
+    page.locator('[data-theme-choice=light]').click();theme(other,'light')
+    other.locator('[data-theme-choice=dark]').click();theme(page,'dark')
+    for invalid in ['invalid', 'system', '', None]:
+        if invalid is None: other.evaluate("localStorage.removeItem('pupillentrainer-theme')")
+        else: other.evaluate("v=>localStorage.setItem('pupillentrainer-theme',v)", invalid)
+        theme(page,'light');page.reload();theme(page,'light')
+        assert page.locator('[data-theme-choice=light]').get_attribute('aria-pressed')=='true'
+    other.evaluate("localStorage.setItem('pupillentrainer-theme','dark')");theme(page,'dark')
+    other.evaluate("sessionStorage.setItem('pupillentrainer-theme','light')")
+    page.evaluate("dispatchEvent(new StorageEvent('storage',{key:'pupillentrainer-theme',newValue:'light',storageArea:sessionStorage}))")
+    page.wait_for_timeout(100);theme(page,'dark')
+    # Real clear event tested in a separate browser context so match records survive.
+    clearctx=browser.new_context(color_scheme='dark');cp=clearctx.new_page();cq=clearctx.new_page()
+    cp.goto(base+'/privacy.html');cq.goto(base+'/privacy.html')
+    cq.locator('[data-theme-choice=dark]').click();theme(cp,'dark')
+    cq.evaluate('localStorage.clear()');theme(cp,'light');clearctx.close()
     assert db(page)==saved
     page.locator(f'[data-m="{match}"]').click();assert not page.locator('#undo').is_disabled()
     passed.append('new tab / real cross-tab updates / invalid preference / undo survive theme changes')
     # Actual app export and import retain complete records; theme is not in backup.
-    page.select_option('#themeChoice','dark')
+    page.locator('[data-theme-choice=dark]').click()
     with page.expect_download() as info: page.click('#export')
     backup=json.loads(Path(info.value.path()).read_text());after_export=db(page)
     assert backup==json.loads(after_export)
     assert 'pupillentrainer-theme' not in json.dumps(backup)
-    page.select_option('#themeChoice','light')
+    page.locator('[data-theme-choice=light]').click()
     page.locator('#import').set_input_files({'name':'fictional.json','mimeType':'application/json','buffer':json.dumps(backup).encode()})
     assert json.loads(db(page))==backup
-    assert page.get_by_label('Weergave').input_value()=='light'
+    assert page.locator('[data-theme-choice=light]').get_attribute('aria-pressed')=='true'
     page.locator(f'[data-m="{match}"]').click();assert not page.locator('#undo').is_disabled()
-    page.select_option('#themeChoice','dark');page.evaluate('window.print=()=>{}');page.click('#printBtn')
+    page.locator('[data-theme-choice=dark]').click();page.evaluate('window.print=()=>{}');page.click('#printBtn')
     page.emulate_media(media='print')
     for selector in ['#printOut','#printOut .legend','#printOut td.on','#printOut td.k']:
         v=page.locator(selector).first.evaluate(measure);assert ratio(v['fg'],v['bg'])>=4.5,(selector,v)
@@ -174,16 +211,23 @@ try:
     for failure in ['read','write']:
         ctx=browser.new_context(color_scheme='dark')
         ctx.add_init_script("""(() => {const name=FAIL==='read'?'getItem':'setItem',original=Storage.prototype[name];Storage.prototype[name]=function(k,...rest){if(k==='pupillentrainer-theme')throw new DOMException('theme blocked',FAIL==='read'?'SecurityError':'QuotaExceededError');return original.call(this,k,...rest)};})();""".replace('FAIL',json.dumps(failure)))
-        pg=ctx.new_page();pg.on('pageerror',lambda e:errors.append(str(e)));pg.goto(base+'/index.html');theme(pg,'dark')
-        pg.select_option('#themeChoice','light');theme(pg,'light');pg.fill('#tname','Fictief '+failure);pg.locator('#addTeam button').click()
+        pg=ctx.new_page();pg.on('pageerror',lambda e:errors.append(str(e)));pg.goto(base+'/index.html');theme(pg,'light')
+        pg.locator('[data-theme-choice=dark]').click();theme(pg,'dark');pg.fill('#tname','Fictief '+failure);pg.locator('#addTeam button').click()
         assert len(json.loads(db(pg))['teams'])==1
         ctx.close()
     passed.append('theme-only SecurityError/QuotaExceededError allow appearance changes and normal match storage')
-    nojs=browser.new_context(java_script_enabled=False,color_scheme='dark');pg=nojs.new_page();pg.goto(base+'/privacy.html')
-    assert pg.locator('body').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(17, 24, 39)'
-    assert not pg.locator('.theme-control').is_visible()
-    pg.emulate_media(media='print');assert pg.locator('body').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(255, 255, 255)'
-    passed.append('disabled JavaScript follows system CSS and prints light, no inert selector')
+    nojs=browser.new_context(java_script_enabled=False,color_scheme='dark')
+    for name in ['index.html','uitleg.html','privacy.html']:
+        pg=nojs.new_page();pg.goto(base+'/'+name)
+        assert pg.locator('body').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(250, 248, 255)'
+        assert not pg.locator('.theme-control').is_visible()
+        assert all(b.is_disabled() for b in pg.locator('[data-theme-choice]').all())
+        pg.emulate_media(color_scheme='light')
+        assert pg.locator('body').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(250, 248, 255)'
+        pg.emulate_media(media='print');assert pg.locator('body').evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(255, 255, 255)'
+        pg.close()
+    nojs.close()
+    passed.append('all pages with JavaScript disabled stay light regardless of OS, hide inert buttons, print light')
     assert not external and not errors,(external,errors)
     browser.close()
  report={'passed':passed,'contrast_measurements':contrasts,'ui_contrast_measurements':ui_contrasts,'full_record_before_theme_changes':json.loads(saved),'full_record_after_export_restore':backup,'page_errors':errors,'external_requests':external}

@@ -25,25 +25,13 @@
     --bench: #253044; --logo-backing: #faf8ff;
   }
 }
-/* System fallback also works without JavaScript. Explicit light always wins. */
-@media screen and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) {
-    color-scheme: dark;
-    --primary: #8cddb7; --primary-hover: #abefcc; --primary-light: #183e32;
-    --secondary: #75c8ff; --surface: #111827; --card: #192333; --subtle: #253044;
-    --text: #edf2fa; --muted: #bdc9da; --border: #52647d; --control-border: #8192ab; --error: #ffb4ab;
-    --button: #006948; --button-hover: #005137; --token: #006398;
-    --on: #194d39; --on-text: #abefc6; --on-hover: #236447;
-    --off: #253044; --off-hover: #35445c; --keeper: #655018; --keeper-text: #fff2a0;
-    --danger-bg: #44252b; --danger-border: #df8d88; --chip-hover: #44252b;
-    --warning-bg: #41351b; --warning-text: #ffe0a3; --warning-border: #efb35f;
-    --bench: #253044; --logo-backing: #faf8ff;
-  }
-}
-
-.theme-control { display: none; flex-wrap: wrap; align-items: center; gap: .4rem; max-width: 100%; font-size: .875rem; }
+.theme-control { display: none; align-items: center; gap: .5rem; max-width: 100%; }
 :root[data-theme] .theme-control { display: flex; }
-.theme-control select { font-family: inherit; padding: .5rem .7rem; font-size: 1rem; min-height: 42px; max-width: 100%; min-width: 0; border: 1px solid var(--muted); border-radius: 6px; background: var(--card); color: var(--text); }
+.theme-control button { width: 44px; min-width: 44px; height: 44px; padding: 8px; margin: 0; flex-shrink: 0; border: 2px solid var(--muted); border-radius: 6px; background: var(--card); color: var(--text); }
+.theme-control button:hover { background: var(--subtle); border-color: var(--muted); }
+.theme-control button[aria-pressed="true"] { background: var(--primary-light); border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.theme-control button:focus-visible { outline: 3px solid var(--secondary); outline-offset: 3px; }
+.theme-control svg { display: block; flex-shrink: 0; }
 @media screen {
   input, select { background: var(--card); }
   button, .button, .app-header nav a { background: var(--button); }
