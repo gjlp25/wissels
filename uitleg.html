@@ -66,6 +66,10 @@
   .contents { display: flex; flex-wrap: wrap; gap: .55rem; padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--border) }
   .contents a { display: inline-flex; align-items: center; padding: .4rem .8rem; min-height: 40px; border: 1px solid var(--border); border-radius: 999px; background: var(--subtle); color: var(--muted); text-decoration: none; font-size: .85rem; font-weight: 600 }
   .contents a:hover { color: var(--primary); background: var(--primary-light); border-color: #96c6b5 }
+  .timing-table { overflow-x: auto }
+  .timing-table table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: .9rem }
+  .timing-table th, .timing-table td { border: 1px solid var(--border); padding: .5rem; text-align: left; vertical-align: top; overflow-wrap: normal }
+  .timing-table th { background: var(--subtle) }
   figure { margin: 1.25rem 0 0; padding: .75rem; background: var(--subtle); border: 1px solid var(--border); border-radius: 10px }
   figure a { display: block; border-radius: 6px }
   img { display: block; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px }
@@ -119,6 +123,22 @@
 <li>Kies bij categorieën met keeper voor elk blok één aanwezige speler als keeper. De kolom toont de startminuut van het blok. Zonder vinkje gebruikt de app alleen veldspelers; bij een categorie zonder keeper zijn er geen keeperkolommen.</li>
 <li>Klik op <strong>Nieuw wisselvoorstel</strong> als je een nieuw voorstel wilt. Als je de aanwezigheid, keeper of het wisselinterval wijzigt, maakt de app ook een nieuw schema. Bij een handmatig aangepast, oud of gespeeld schema vraagt de app eerst of je dat wilt vervangen. Annuleren bewaart zowel instellingen als schema. Met <strong>Laatste schemawijziging ongedaan</strong> herstel je één vorige schemawijziging, ook na opnieuw openen.</li>
 </ol>
+<h3>Speeltijd, pauzes en wisselinterval</h3>
+<p>De app adviseert een wisselinterval van een half blok. Dat is een keuze van de app, geen KNVB-verplichting. Je kunt bij <strong>Wissel elke … min</strong> ook een heel blok kiezen. <strong>7:30</strong> betekent 7 minuten en 30 seconden, dus 7,5 minuut.</p>
+<p>Op een smal scherm kun je deze tabel horizontaal schuiven om de pauzemomenten te lezen.</p>
+<div class="timing-table" role="region" aria-label="Speeltijden per categorie" tabindex="0"><table>
+<thead><tr><th>Categorie</th><th>Speeltijd</th><th>Blok</th><th>Aanbevolen wisselinterval</th><th>Pauzemomenten in speelminuten</th></tr></thead>
+<tbody>
+<tr><td>JO7</td><td>3 wedstrijdjes van 15 min</td><td>7:30 min</td><td>3:45 min</td><td>Blokgrenzen op 7:30, 22:30 en 37:30; een nieuw wedstrijdje na 15 en 30 min. Geen keeper.</td></tr>
+<tr><td>JO8 / JO9</td><td>2 × 20 min</td><td>10 min</td><td>5 min</td><td>Drinkpauzes op 10 en 30; rust op 20 min.</td></tr>
+<tr><td>JO10</td><td>2 × 25 min</td><td>12:30 min</td><td>6:15 min</td><td>Drinkpauzes op 12:30 en 37:30; rust op 25 min.</td></tr>
+<tr><td>JO11 / MO11 / JO12</td><td>2 × 30 min</td><td>15 min</td><td>7:30 min</td><td>Drinkpauzes op 15 en 45; rust op 30 min.</td></tr>
+</tbody>
+</table></div>
+<p>Bij JO8 tot en met JO12 en MO11 duren de twee drinkpauzes (time-outs) maximaal 2 minuten per pauze. De rust duurt bij JO8, JO9 en JO10 maximaal 10 minuten; bij JO11, MO11 en JO12 maximaal 15 minuten. Een keeperblok loopt tot een time-out of rust. Bij het aanbevolen halve blok zijn er twee wisselperiodes per keeperblok: in een nieuw voorstel blijft de gekozen keeper beide periodes staan. Keeper per periode in de tabel blijft beschikbaar om achteraf te corrigeren.</p>
+<p>Alle tijden zijn opgetelde speelminuten. Pauzes tellen niet mee in het schema of de speelminuten. Houd je eigen klok tijdens een pauze stil en ga daarna verder waar je was; de app heeft geen automatische timer. Bij JO7 telt één schema de drie wedstrijdjes door tot 45 speelminuten.</p>
+<p>Het advies geldt voor nieuwe wedstrijden en bij een bevestigde categorieomzetting als het vorige interval niet meer past. Een passend, zelfgekozen interval blijft staan. Opgeslagen en teruggezette schema’s worden niet stilzwijgend aangepast.</p>
+<p>Speeltijden en wedstrijdvormen: KNVB seizoen 2026/’27, infographics 4 tegen 4 (O7), 6 tegen 6 (O8, O9 en O10) en 8 tegen 8 (O11 en O12).</p>
 <p>Bij oude wedstrijden zonder opgeslagen status toont de app <strong>afgeleid</strong>: een datum vóór vandaag telt voorlopig als Gespeeld, vandaag of later als Klaar. Dit is geen bewijs dat er is gespeeld. Kies zelf de juiste status. De app verandert het oude schema niet.</p>
 <figure><a href="assets/manual/03-wedstrijd.png"><img src="assets/manual/03-wedstrijd.png" alt="Voorbeeldwedstrijd: 1 datum en tegenstander, 2 aanwezigheid, 3 uitleg keeperblokken, 4 nieuw wisselvoorstel."></a><figcaption>Speler H is afwezig; de keeper wisselt per blok. De status Klaar betekent dat dit nog een voorbereiding is.</figcaption></figure>
 </section>

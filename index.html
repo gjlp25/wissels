@@ -158,6 +158,7 @@
   </div>
   <p id="statusHint" role="status"></p>
   <p id="mCat"></p>
+  <p><small id="timingHint"></small></p>
   <div id="mPlayers"></div>
   <p><small id="keeperHint"></small></p>
   <div class="row"><button id="gen">Nieuw wisselvoorstel</button> <button class="alt" id="undo" disabled>Laatste schemawijziging ongedaan</button> <button class="alt" id="matchModeBtn">Wedstrijdmodus</button> <button class="alt" id="printBtn">Printen / PDF</button> <button class="alt" id="delMatch">Verwijder wedstrijd</button></div>
@@ -270,7 +271,7 @@ const catOptions = sel => Object.entries(CATS).map(([k, c]) => `<option value="$
 function setCat(m, k) {
   const c = CATS[k];
   m.cat = k;
-  if (!intervals(c).includes(m.interval)) m.interval = intervals(c).find(Number.isInteger) ?? c.block;
+  if (!intervals(c).includes(m.interval)) m.interval = c.block / 2;
   m.keepers = Array.from({ length: c.keeper ? c.blocks : 0 }, (_, q) => m.keepers?.[q] ?? null);
 }
 
@@ -302,8 +303,12 @@ function renderMatch(m) {
   $('#mDate').value = m.date; $('#mOpp').value = m.opponent;
   $('#mInt').innerHTML = intervals(c).map(x => `<option value="${x}" ${x === m.interval ? 'selected' : ''}>${fmt(x)}</option>`).join('');
   $('#mCat').textContent = `Categorie: ${c.label} (${c.field} spelers in het veld${c.keeper ? ', inclusief keeper' : ''})`;
+  $('#timingHint').textContent = (c.keeper
+    ? `Twee drinkpauzes (time-outs) na ${fmt(c.block)} en ${fmt(3 * c.block)} speelminuten, maximaal 2 min per pauze; rust na ${fmt(2 * c.block)} speelminuten, maximaal ${c.field === 8 ? 15 : 10} min.`
+    : 'Drie wedstrijdjes van 15 min, elk in twee blokken van 7:30. Blokgrenzen na 7:30, 22:30 en 37:30 speelminuten; een nieuw wedstrijdje begint na 15 en 30 speelminuten.') +
+    ` Aanbevolen door de app: wissel elke ${fmt(c.block / 2)} min (een half blok; geen KNVB-verplichting). Je kunt ook een heel blok kiezen. Tijden zijn opgetelde speelminuten. Pauzes tellen niet mee in het schema of de speelminuten; ga na de pauze verder waar je was.`;
   $('#keeperHint').textContent = c.keeper
-    ? `Kies per blok van ${fmt(c.block)} min een keeper. Een blok loopt tot de time-out of rust. Zonder keeper staan er ${c.field} veldspelers.` : '';
+    ? `Kies per blok van ${fmt(c.block)} min een keeper. In een nieuw voorstel wisselt de keeper alleen op een blokgrens (time-out of rust), niet bij elke wisselperiode. Zonder keeper staan er ${c.field} veldspelers.` : '';
   $('#mPlayers').innerHTML = '<table><tr><th>Speler</th><th>Aanwezig</th>' +
     m.keepers.map((_, q) => `<th>${q ? '' : 'Keeper '}${fmt(q * c.block)}'</th>`).join('') + '</tr>' +
     players().map(p => { const here = m.present.includes(p.id);

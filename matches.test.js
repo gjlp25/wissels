@@ -15,6 +15,86 @@ function app(storage = { value: JSON.stringify(initial()) }, accept = true) {
   vm.runInContext(fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1], context);
   return { node, alerts, storage, reloads:()=>reloadCount, data:()=>JSON.parse(storage.value), run:code=>vm.runInContext(code, context) };
 }
+test('new matches recommend half a category block, including fractional minutes', () => {
+  for (const [category, interval, total] of [['JO7',3.75,45],['JO8',5,40],['JO9',5,40],['JO10',6.25,50],['JO11',7.5,60],['MO11',7.5,60],['JO12',7.5,60]]) {
+    const d=initial(); d.teams[0].cat=category;
+    const a=app({value:JSON.stringify(d)}); a.node('#newMatch').onclick();
+    const m=a.data().matches[0];
+    assert.equal(m.interval,interval,category);
+    assert.equal(m.slots.length*m.interval,total,category);
+    assert.equal(m.slots.length,category==='JO7'?12:8);
+    assert.ok(m.slots.every(on=>on.length===a.run(`CATS.${category}.field`)));
+  }
+});
+
+test('category guidance distinguishes breaks, recommended intervals and keeper blocks', () => {
+  for (const category of ['JO7','JO8','JO9','JO10','JO11','MO11','JO12']) {
+    const d=initial(); d.teams[0].cat=category;
+    const a=app({value:JSON.stringify(d)}); a.node('#newMatch').onclick();
+    const hint=a.node('#timingHint').textContent || '';
+    assert.match(hint,/Aanbevolen door de app/);
+    assert.match(hint,/geen KNVB-verplichting/);
+    assert.match(hint,/Pauzes tellen niet mee/);
+    if(category==='JO7') {
+      assert.match(hint,/7:30, 22:30 en 37:30/);
+      assert.match(hint,/15 en 30/);
+      assert.match(hint,/3:45/);
+      assert.equal(a.node('#keeperHint').textContent,'');
+    } else {
+      assert.match(hint,/Twee drinkpauzes/);
+      assert.match(a.node('#keeperHint').textContent,/niet bij elke wisselperiode/);
+    }
+    if(category==='JO10') assert.match(hint,/6:15/);
+    if(['JO11','MO11','JO12'].includes(category)) {
+      assert.match(hint,/15 en 45/);
+      assert.match(hint,/rust na 30 speelminuten, maximaal 15 min/);
+    } else if(category!=='JO7') assert.match(hint,/rust na .*maximaal 10 min/);
+  }
+});
+
+test('category conversion uses the recommendation only when the saved interval is unsupported', () => {
+  const a=app(); a.node('#newMatch').onclick();
+  a.node('#mInt').onchange({target:{value:'10'}});
+  a.node('#teamCat').onchange({target:{value:'JO8'}});
+  assert.equal(a.data().matches[0].interval,10);
+  const original=a.data().matches[0];
+  a.node('#teamCat').onchange({target:{value:'JO11'}});
+  assert.equal(a.data().matches[0].interval,7.5);
+  a.node('#undo').onclick();
+  assert.equal(a.data().matches[0].interval,10);
+  assert.deepEqual(a.data().matches[0].slots,original.slots);
+  const b=app(a.storage,false), before=b.data().matches;
+  b.node('#teamCat').onchange({target:{value:'JO10'}});
+  assert.deepEqual(b.data().matches,before);
+  b.node('#newMatch').onclick();
+  assert.equal(b.data().matches.at(-1).interval,6.25);
+});
+
+test('whole-block selections and complete saved records survive reload and backup validation unchanged', () => {
+  for (const category of ['JO7','JO8','JO9','JO10','JO11','MO11','JO12']) {
+    const d=initial(); d.teams[0].cat=category;
+    const a=app({value:JSON.stringify(d)}); a.node('#newMatch').onclick();
+    const block=a.run(`CATS.${category}.block`);
+    a.node('#mInt').onchange({target:{value:String(block)}});
+    const before=a.data();
+    const b=app(a.storage); b.node('#matches').onclick({target:{dataset:{m:before.matches[0].id}}});
+    assert.deepEqual(b.data(),before);
+    assert.deepEqual(JSON.parse(b.run('JSON.stringify(validateBackup(db))')),before);
+    assert.equal(b.data().matches[0].interval,block);
+  }
+});
+
+test('recommended substitution periods keep proposal keepers until their block boundary', () => {
+  for(const category of ['JO7','JO8','JO9','JO10','JO11','MO11','JO12']) {
+    const d=initial(); d.teams[0].cat=category;
+    const a=app({value:JSON.stringify(d)}); a.node('#newMatch').onclick();
+    if(category!=='JO7') for(let q=0;q<4;q++) a.node('#matchSec').onchange({target:{dataset:{keeper:`p${q}`,q:String(q)},checked:true}});
+    const m=a.data().matches[0];
+    assert.deepEqual(m.keeperBySlot,category==='JO7'?Array(12).fill(null):['p0','p0','p1','p1','p2','p2','p3','p3']);
+    assert.equal(a.run('Object.values(minutes(match())).reduce((a,b)=>a+b,0)'), a.run('cat(match()).field*cat(match()).blocks*cat(match()).block'));
+  }
+});
+
 test('new matches start Concept and only played matches enter totals and history', () => {
   const a=app(); a.node('#newMatch').onclick();
   assert.equal(a.data().matches[0].status,'draft');
