@@ -21,14 +21,23 @@ Audited against main `1fa5fad8285ec89da65d0185e2cf6ea75d344a90`:
 
 Read-only GitHub discovery returned no homepage, deployments, Actions workflows, rulesets or open PRs. Pages lookup returned 404 and main protection lookup returned “Branch not protected”. These results do not establish who operates a separate live deployment. No platform configuration was changed.
 
-Robert confirmed that the mailbox `robert@wicaro.nl` is provided by STRATO and the domain `pupillentrainer.nl` is registered with TransIP. These are owner-supplied facts; domain registration does not establish website hosting. Runtime HTTPS/DNS discovery failed name resolution and the external web fetch timed out, so neither attempt established the live host or that the domain is absent. No provider-specific processing locations, transfers or retention claims were added.
+Robert confirmed that `robert@wicaro.nl` is a STRATO mailbox, `pupillentrainer.nl` is registered with TransIP, and he intends to host the app on Vercel ("Nee ik ga hem op vercel draaien"). Vercel is the intended website host; TransIP is the registrar. This does not establish a live Vercel deployment or a connected custom domain. Robert remains the confirmed maker/contact, not an independently verified formal controller.
 
-Before publishing a complete live privacy declaration, Robert must confirm:
+Vercel's Privacy Notice identifies hosted-site traffic data such as end-user IP addresses and system configuration information.[1] This is separate from application records in browser localStorage. The notice describes Vercel's own practices and excludes processing as a customer's processor under its DPA.[1] The DPA describes processing arrangements under the customer agreement; reading it does not verify Robert's applicable contract or account configuration.[2] No exact log period, processing region or automatic plan-specific DPA coverage is asserted.
 
-1. The actual live address, hosting operator/controller, hosting/proxy services, actual logs/cookies/analytics, purpose and lawful basis, access/recipients, retention/deletion criteria and processing locations/transfers.
-2. The feedback-mail recipients/access, applicable lawful basis, actual retention/deletion practice and relevant processing locations/transfers. The mailbox provider is now confirmed as STRATO. The page labels a case-resolution retention criterion as a proposal, not an established practice. No fixed period or processing region is invented.
+Before publishing a complete live privacy declaration:
 
-The page visibly labels these gaps and distinguishes verified application behavior from incomplete live-hosting/mail information. Keep this PR unmerged and undeployed for independent review and resolution of publication facts. It does not claim blanket GDPR compliance.
+1. Verify the actual live address, controller identity and deployed configuration, including any additional proxy, cookies or analytics. Match the notice to the applicable hosting agreement and technical-data practices; do not ask Robert to identify Vercel again or guess the vendor's internal retention.
+2. Robert still needs to establish feedback-mail access and actual deletion practice; document the applicable basis and provider arrangements separately. A simple **recommendation, not an adopted policy**, is to delete identifying feedback after resolution, with a maximum of three months after resolution, and keep useful bug notes only after anonymization. Any genuinely necessary exception needs its own reason and review date. The public page's existing case-resolution criterion remains explicitly proposed, without claiming a new retention policy.
+
+The page remains visibly labelled as a draft. Keep this PR unmerged and undeployed pending the requested review and factual completion. This is a scoped factual update, not a full legal compliance review.
+
+## Sources
+
+[1] https://vercel.com/legal/privacy-notice
+[2] https://vercel.com/legal/dpa
+
+Retrieved directly over HTTPS on 10 October 2026. The Privacy Notice's hosted-site traffic and applicability sections support the distinction above; the DPA is a reference for contractual verification, not evidence of the project's actual agreement.
 
 Authoritative AP guidance retrieved on 10 October 2026 (initial old URLs could not be extracted; current search results supplied these paths):
 
@@ -38,7 +47,7 @@ Authoritative AP guidance retrieved on 10 October 2026 (initial old URLs could n
 
 ## Verification
 
-Provider-facts follow-up: `node --test` rerun with 85 passing tests. A focused Chromium probe verified rendered STRATO/TransIP facts, explicit hosting/basis/retention gaps, privacy layout at 320/375/844/1280px and enlarged text, zero informational-page storage writes, complete fictional records through app/privacy/manual/return navigation, zero page errors and zero external requests. No email was sent. Application/manual scripts, styles and release versions remain unchanged from approved head `68da715a3c5b915099b55d364d8ac96bbaa11234`. Existing screenshot and broader regression evidence below is from the initial footer implementation; no redundant full recapture was performed for this prose-only follow-up.
+Vercel-intent follow-up: `node --test` rerun with 85 passing tests. The focused real Chromium probe passed seven groups: rendered Vercel intent (not a verified live deployment/domain connection), STRATO/TransIP facts, sourced technical-traffic explanation and explicit remaining mail-policy gaps; privacy layout at 320/375/844/1280px and enlarged text; and complete fictional records through app/privacy/manual/return navigation. It recorded zero informational-page storage writes, page errors or external requests; no email was sent. Evidence: `/opt/data/cache/scratch/wissels-footer-vercel-report.json`. All three footers, release version, application/manual files, schedule.js, footer.css, privacy styles and Dockerfile remain byte-identical to prior head `4287d8c406f882d7c78c25679d0866f84991cee6`. Broader suites and screenshots below are initial implementation evidence, not rerun for this prose-only update.
 
 - `node --test`: 85 tests passed, zero failed. Added focused footer/privacy/package contracts; updated old blanket external-URL assertions to forbid external resources while allowing ordinary approved links.
 - `scripts/verify-footer-privacy.py`: 16 acceptance groups across all three pages at 320x740, 375x812, 844x390 and 1280x900. Real app/privacy/manual/return navigation preserves complete fictional stored JSON; informational pages make zero localStorage writes. Exact mailto and LinkedIn targets, sequential footer Tab order, focus outline, wrapping, no document overflow, enlarged text and print hiding pass. No pre-click external requests; deliberate LinkedIn navigation is intercepted and blocked. No email sent.
