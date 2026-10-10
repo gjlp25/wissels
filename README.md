@@ -40,7 +40,7 @@ docker run -d --name wissels -p 8080:80 --restart unless-stopped wissels
 
 ## Deployen zonder Docker
 
-Omdat het een statische site is, kun je `index.html`, `schedule.js`, `uitleg.html`, `privacy.html`, `footer.css` en de volledige map `assets/` ook op elke webserver of statische host zetten (nginx, Apache, GitHub Pages, Netlify, ...). Houd de mapstructuur intact.
+Omdat het een statische site is, kun je `index.html`, `schedule.js`, `uitleg.html`, `privacy.html`, `footer.css`, `theme.js`, `theme.css` en de volledige map `assets/` ook op elke webserver of statische host zetten (nginx, Apache, GitHub Pages, Netlify, ...). Houd de mapstructuur intact.
 
 ## Let op: gegevens
 
@@ -55,3 +55,5 @@ node --test
 ```
 
 Runs the full generator, persistence, matchday, import and static-delivery suites. See `docs/matchday-improvements.md` for acceptance/compatibility decisions and `scripts/verify-matchday.py` for real-browser verification (external Playwright tooling required).
+
+Release 2026.10.2 adds shared system/light/dark appearance. See `docs/dark-mode.md` for behavior, browser/contrast evidence and the `scripts/verify-theme.py` acceptance command.

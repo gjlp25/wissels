@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PupillenTrainer</title>
+<script src="theme.js"></script>
 <style>
   :root {
     --primary: #006948;
@@ -123,11 +124,13 @@
   }
 </style>
 <link rel="stylesheet" href="footer.css">
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <header class="app-header">
 <div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Wisselschema</h1></div>
 <nav aria-label="Hulp"><a href="uitleg.html">Uitleg</a></nav>
+<div class="theme-control"><label for="themeChoice">Weergave</label><select id="themeChoice"><option value="system">Systeem</option><option value="light">Licht</option><option value="dark">Donker</option></select></div>
 </header>
 
 <section>
@@ -213,7 +216,7 @@
   <div class="footer-row">
     <p class="creator-credit">Gemaakt door Robert Postma · <a href="https://www.linkedin.com/in/robert-postma-6abb1a79" rel="noreferrer">LinkedIn</a></p>
     <nav aria-label="Footer"><a href="uitleg.html">Uitleg</a><a href="privacy.html">Privacy &amp; gegevens</a><a href="mailto:robert@wicaro.nl">Feedback</a></nav>
-    <small title="Release met privacy-informatie en feedbacklinks">Versie 2026.10.1</small>
+    <small title="Release met lichte en donkere weergave">Versie 2026.10.2</small>
   </div>
   <p class="feedback-note">Feedback per e-mail. Stuur geen kindernamen of volledige back-ups.</p>
 </footer>

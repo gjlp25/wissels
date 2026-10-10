@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Uitleg: Wisselschema</title>
+<script src="theme.js"></script>
 <style>
   :root {
     --primary: #006948;
@@ -80,16 +81,19 @@
   @media print { body { background: #fff; max-width: none } header, footer, .contents { display: none } section, .intro { box-shadow: none } img { max-height: 16cm; width: auto } figure { break-inside: avoid } }
 </style>
 <link rel="stylesheet" href="footer.css">
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <header>
 <p><a class="button" href="index.html">Terug naar Wisselschema</a></p>
 <div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Uitleg: je eerste wisselschema</h1></div>
+<div class="theme-control"><label for="themeChoice">Weergave</label><select id="themeChoice"><option value="system">Systeem</option><option value="light">Licht</option><option value="dark">Donker</option></select></div>
 </header>
 <main>
 <div class="intro">
 <p>Maak een team, voeg spelers toe en bereid een wedstrijd voor. De afbeeldingen tonen de app met verzonnen namen: Voorbeeldteam JO9, Speler A t/m H en Voorbeeldclub. Ook de wedstrijddatum is een voorbeeld.</p>
 <p>De nummers in de afbeeldingen horen bij de stappen in de tekst. Lees op een telefoon eerst de tekst. Klik of tik op een afbeelding om die groter te openen. Met de terugknop van je browser kom je terug bij de uitleg.</p>
+<p>Met <strong>Weergave</strong> bovenaan kies je <strong>Systeem</strong>, <strong>Licht</strong> of <strong>Donker</strong>. Systeem volgt de instelling van je apparaat. Je keuze blijft in deze browser bewaard; printen en PDF blijven licht.</p>
 <nav class="contents" aria-label="Stappen in deze uitleg">
 <a href="#stap-1">1. Team</a><a href="#stap-2">2. Spelers</a><a href="#stap-3">3. Wedstrijd</a><a href="#stap-4">4. Schema</a><a href="#stap-5">5. Opstelling</a><a href="#stap-6">6. Totalen en PDF</a><a href="#stap-7">7. Back-up en privacy</a>
 </nav>
@@ -209,7 +213,7 @@
   <div class="footer-row">
     <p class="creator-credit">Gemaakt door Robert Postma · <a href="https://www.linkedin.com/in/robert-postma-6abb1a79" rel="noreferrer">LinkedIn</a></p>
     <nav aria-label="Footer"><a href="uitleg.html">Uitleg</a><a href="privacy.html">Privacy &amp; gegevens</a><a href="mailto:robert@wicaro.nl">Feedback</a></nav>
-    <small title="Release met privacy-informatie en feedbacklinks">Versie 2026.10.1</small>
+    <small title="Release met lichte en donkere weergave">Versie 2026.10.2</small>
   </div>
   <p class="feedback-note">Feedback per e-mail. Stuur geen kindernamen of volledige back-ups.</p>
 </footer>

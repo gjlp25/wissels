@@ -14,7 +14,7 @@ test('manual provides Dutch numbered steps, privacy and replacement warning', ()
   assert.match(html, /href="index.html"/);
   assert.equal((html.match(/<section id="stap-/g) || []).length, 7);
   for (const term of ['localStorage', 'niet versleuteld', 'privémodus', 'geen account', 'vervangt', 'JSON', 'PDF', 'server', 'protocol']) assert.ok(html.includes(term), term);
-  assert.doesNotMatch(html, /<script|<(?:img|link)\b[^>]*(?:src|href)="https?:\/\//);
+  assert.doesNotMatch(html, /<script(?! src="theme\.js"><\/script>)|<(?:img|link)\b[^>]*(?:src|href)="https?:\/\//);
 });
 test('every instructional image is local, described and opens larger', () => {
   const html = read('uitleg.html');
