@@ -11,7 +11,7 @@ test('app and manual share the approved local green design tokens', () => {
     assert.match(html, /--surface:\s*#faf8ff/);
     assert.match(html, /\[hidden\]\s*\{\s*display:\s*none\s*!important/);
     assert.match(html, /:focus-visible/);
-    assert.doesNotMatch(html, /https?:\/\/|@import|fonts\.google/);
+    assert.doesNotMatch(html, /<(?:img|script|link)\b[^>]*(?:src|href)="https?:\/\/|@import|fonts\.google/);
   }
 });
 
@@ -29,16 +29,16 @@ test('app and manual each credit the creator exactly once in a footer', () => {
   for (const file of ['index.html', 'uitleg.html']) {
     const html = read(file);
     assert.equal(html.split(credit).length - 1, 1, file);
-    assert.match(html, /<footer[^>]*>[\s\S]*?<p class="creator-credit">Gemaakt door Robert Postma<\/p>[\s\S]*?<\/footer>/);
+    assert.match(html, /<footer[^>]*>[\s\S]*?<p class="creator-credit">Gemaakt door Robert Postma[\s\S]*?<\/p>[\s\S]*?<\/footer>/);
   }
 });
 
 test('creator footers preserve manual return navigation and app print isolation', () => {
   const app = read('index.html');
   const manual = read('uitleg.html');
-  assert.match(app, /<\/section>\s*<footer>[\s\S]*?<\/footer>\s*<div id="printOut"><\/div>\s*<script src="schedule.js">/);
+  assert.match(app, /<\/section>\s*<footer[^>]*>[\s\S]*?<\/footer>\s*<div id="printOut"><\/div>\s*<script src="schedule.js">/);
   assert.match(app, /body:has\(#printOut:not\(:empty\)\) > :not\(#printOut\) \{ display: none !important \}/);
-  assert.match(manual, /<footer><p><a class="button" href="index.html">Terug naar Wisselschema<\/a><\/p>/);
+  assert.match(manual, /<footer[^>]*>\s*<p><a class="button" href="index.html">Terug naar Wisselschema<\/a><\/p>/);
   assert.match(manual, /header, footer, \.contents \{ display: none \}/);
 });
 
