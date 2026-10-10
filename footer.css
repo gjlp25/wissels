@@ -1,0 +1,9 @@
+.site-footer { border-top: 1px solid var(--border); margin-top: 1.25rem; padding-top: .75rem; color: var(--muted); font-size: .85rem; }
+.footer-row, .site-footer nav { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1rem; }
+.footer-row { justify-content: space-between; }
+.site-footer .creator-credit { margin: 0; text-align: left; font-size: inherit; }
+.site-footer a:not(.button) { color: var(--primary); text-decoration: underline; text-underline-offset: .2em; display: inline-block; padding: .35rem 0; }
+.site-footer a:focus-visible { outline: 3px solid var(--secondary); outline-offset: 3px; }
+.site-footer small { font-size: .8rem; }
+.site-footer .feedback-note { margin: .3rem 0 0; font-size: .8rem; }
+@media print { .site-footer { display: none; } }
