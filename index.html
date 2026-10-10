@@ -51,7 +51,9 @@
   }
   /* Scroll only the data tables; field tokens may extend beyond the board. */
   #mPlayers, #schedule, #stats, #fairnessData { overflow-x: auto; max-width: 100%; margin: .75rem 0; padding-bottom: .2rem }
-  .app-header .brand { flex: 1 1 18rem }
+  .app-header .brand { flex: 1 1 18rem; flex-wrap: wrap }
+  .app-header h1 { text-wrap: balance }
+  .app-header .theme-control { margin-inline-start: auto }
   section > h2 { border-left: 4px solid var(--primary); padding-left: .65rem }
   #delTeam, #delMatch { background: #fff; border-color: #e59b9b; color: var(--error) }
   #delTeam:hover, #delMatch:hover { background: #fff0ee; border-color: var(--error) }
@@ -129,7 +131,6 @@
 <body>
 <header class="app-header">
 <div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Wisselschema</h1></div>
-<nav aria-label="Hulp"><a href="uitleg.html">Uitleg</a></nav>
 <div class="theme-control" role="group" aria-label="Weergave">
 <button type="button" data-theme-choice="light" aria-label="Licht" title="Licht" aria-pressed="true" disabled><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
 <button type="button" data-theme-choice="dark" aria-label="Donker" title="Donker" aria-pressed="false" disabled><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.9 13.1A9 9 0 0 1 10.9 3.1a9 9 0 1 0 10 10Z"/></svg></button>

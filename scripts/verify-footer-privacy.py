@@ -78,6 +78,13 @@ try:
                 page.emulate_media(media='screen')
                 passed.append(f'{name} {width}x{height}: storage, targets, focus, overflow, print')
         page.goto(base + '/index.html')
+        page.locator('.site-footer').get_by_role('link', name='Uitleg', exact=True).click()
+        assert page.url == base + '/uitleg.html'
+        assert page.evaluate('window.storageWrites') == 0
+        page.locator('header').get_by_role('link', name='Terug naar Wisselschema').click()
+        assert page.url == base + '/index.html'
+        assert page.evaluate("localStorage.getItem('wissels-jo9')") == saved
+        passed.append('app footer Uitleg / manual header return preserve complete saved JSON')
         page.locator('.site-footer').get_by_role('link', name='Privacy & gegevens').click()
         assert page.url == base + '/privacy.html'
         assert page.evaluate('window.storageWrites') == 0

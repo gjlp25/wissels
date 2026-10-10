@@ -4,9 +4,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
 const read = name => fs.existsSync(name) ? fs.readFileSync(name, 'utf8') : '';
-test('app links to the separate Dutch manual at the top', () => {
+test('app links to the Dutch manual once in the footer, not the header', () => {
   const html = read('index.html');
-  assert.match(html.slice(0, html.indexOf('<section>')), /href="uitleg.html"[^>]*>Uitleg/);
+  const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)[0];
+  const footer = html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)[0];
+  assert.doesNotMatch(header, /href="uitleg.html"|<nav\b/);
+  assert.match(footer, /href="uitleg.html"[^>]*>Uitleg/);
+  assert.equal((html.match(/href="uitleg.html"/g) || []).length, 1);
 });
 test('manual provides Dutch numbered steps, privacy and replacement warning', () => {
   const html = read('uitleg.html');

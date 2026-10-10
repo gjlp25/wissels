@@ -21,7 +21,7 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
 server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(a.root)))
 threading.Thread(target=server.serve_forever, daemon=True).start()
 base = f'http://127.0.0.1:{server.server_port}'
-passed, contrasts, ui_contrasts, errors, external = [], [], [], [], []
+passed, contrasts, ui_contrasts, errors, external, headers = [], [], [], [], [], []
 # Resolve actual alpha backgrounds through the ancestor chain, not token guesses.
 measure = """el => {
  const rgb=s=>(s.match(/[\\d.]+/g)||[]).map(Number);
@@ -74,6 +74,40 @@ def contrast(page, theme, label):
     assert page.locator('[data-theme-choice=dark]').evaluate('el=>getComputedStyle(el).outlineStyle')=='solid'
     r=ratio(v['outline'],v['outside']);assert r>=3
     ui_contrasts.append({'theme':theme,'selector':'[data-theme-choice=dark]','kind':'focus','ratio':round(r,3)})
+
+def header_layout(page, enlarged=False):
+    header = page.locator('.app-header')
+    assert header.locator('nav, a[href="uitleg.html"]').count() == 0
+    assert page.locator('a[href="uitleg.html"]').count() == 1
+    assert page.locator('.site-footer a[href="uitleg.html"]').count() == 1
+    group = header.get_by_role('group', name='Weergave')
+    assert group.count() == 1 and group.get_by_role('button').count() == 2
+    assert page.locator('[data-theme-choice]').count() == 2
+    geometry = header.evaluate("""e => {
+      const rect=n=>{const r=n.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+      const h=e.querySelector('h1'), image=e.querySelector('img');
+      return {header:rect(e),brand:rect(e.querySelector('.brand')),heading:rect(h),
+        group:rect(e.querySelector('.theme-control')),image:rect(image),
+        lineHeight:parseFloat(getComputedStyle(h).lineHeight),
+        imageLoaded:image.complete && image.naturalWidth===640, overflow:e.scrollWidth>e.clientWidth};
+    }""")
+    assert not geometry['overflow'] and geometry['imageLoaded'], geometry
+    assert abs(geometry['group']['right'] - geometry['header']['right']) <= 1, geometry
+    for key in ['brand', 'heading', 'group', 'image']:
+        assert geometry['header']['left'] <= geometry[key]['left'] <= geometry[key]['right'] <= geometry['header']['right'], geometry
+    assert (geometry['heading']['left'] >= geometry['image']['right'] or
+            geometry['heading']['top'] >= geometry['image']['bottom']), geometry
+    if not enlarged:
+        assert abs(geometry['heading']['height'] - geometry['lineHeight']) <= 1, geometry
+    else:
+        # The enlarged single-word title may wrap, but never an orphan character.
+        lines = page.locator('.app-header h1').evaluate("""e => {
+          const text=e.firstChild, rows=new Map();
+          for(let i=0;i<text.length;i++){const r=document.createRange();r.setStart(text,i);r.setEnd(text,i+1);const y=r.getBoundingClientRect().top;rows.set(y,(rows.get(y)||'')+text.textContent[i]);}
+          return [...rows.values()];
+        }""")
+        assert all(len(line.strip()) > 1 for line in lines), lines
+    return geometry
 
 def db(page):
     return page.evaluate("localStorage.getItem('wissels-jo9')")
@@ -136,6 +170,13 @@ try:
             page.set_viewport_size({'width':width,'height':height})
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             page.evaluate('scrollTo(0,0)')
+            headers.append({'theme':choice, 'viewport':[width,height], 'enlarged':False, **header_layout(page)})
+            page.locator('.app-header').screenshot(path=str(a.output/f'header-{choice}-{width}.png'))
+            enlarged = page.add_style_tag(content='html { font-size:200%; }')
+            headers.append({'theme':choice, 'viewport':[width,height], 'enlarged':True, **header_layout(page, enlarged=True)})
+            assert db(page)==saved
+            page.locator('.app-header').screenshot(path=str(a.output/f'header-{choice}-{width}-large-text.png'))
+            enlarged.evaluate('e=>e.remove()')
             if width in [375,1280]:
                 page.screenshot(path=str(a.output/f'app-{choice}-{width}-top.png'))
                 page.screenshot(path=str(a.output/f'app-{choice}-{width}-full.png'),full_page=True)
@@ -230,7 +271,7 @@ try:
     passed.append('all pages with JavaScript disabled stay light regardless of OS, hide inert buttons, print light')
     assert not external and not errors,(external,errors)
     browser.close()
- report={'passed':passed,'contrast_measurements':contrasts,'ui_contrast_measurements':ui_contrasts,'full_record_before_theme_changes':json.loads(saved),'full_record_after_export_restore':backup,'page_errors':errors,'external_requests':external}
+ report={'passed':passed,'header_layouts':headers,'contrast_measurements':contrasts,'ui_contrast_measurements':ui_contrasts,'full_record_before_theme_changes':json.loads(saved),'full_record_after_export_restore':backup,'page_errors':errors,'external_requests':external}
  (a.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
  print(json.dumps({'passed':passed,'contrast_samples':len(contrasts),'min_text_ratio':min(v['ratio'] for v in contrasts),'min_control_focus_ratio':min(v['ratio'] for v in ui_contrasts)},indent=2))
 finally:
