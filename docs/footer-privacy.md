@@ -21,10 +21,12 @@ Audited against main `1fa5fad8285ec89da65d0185e2cf6ea75d344a90`:
 
 Read-only GitHub discovery returned no homepage, deployments, Actions workflows, rulesets or open PRs. Pages lookup returned 404 and main protection lookup returned “Branch not protected”. These results do not establish who operates a separate live deployment. No platform configuration was changed.
 
+Robert confirmed that the mailbox `robert@wicaro.nl` is provided by STRATO and the domain `pupillentrainer.nl` is registered with TransIP. These are owner-supplied facts; domain registration does not establish website hosting. Runtime HTTPS/DNS discovery failed name resolution and the external web fetch timed out, so neither attempt established the live host or that the domain is absent. No provider-specific processing locations, transfers or retention claims were added.
+
 Before publishing a complete live privacy declaration, Robert must confirm:
 
-1. The live address, hosting operator/controller, hosting/proxy services, actual logs/cookies/analytics, purpose and lawful basis, access/recipients, retention/deletion criteria and processing locations/transfers.
-2. The feedback-mail provider/recipients, applicable lawful basis and actual retention/deletion practice. The page labels a case-resolution retention criterion as a proposal, not an established practice. No invented fixed period or provider/region is stated.
+1. The actual live address, hosting operator/controller, hosting/proxy services, actual logs/cookies/analytics, purpose and lawful basis, access/recipients, retention/deletion criteria and processing locations/transfers.
+2. The feedback-mail recipients/access, applicable lawful basis, actual retention/deletion practice and relevant processing locations/transfers. The mailbox provider is now confirmed as STRATO. The page labels a case-resolution retention criterion as a proposal, not an established practice. No fixed period or processing region is invented.
 
 The page visibly labels these gaps and distinguishes verified application behavior from incomplete live-hosting/mail information. Keep this PR unmerged and undeployed for independent review and resolution of publication facts. It does not claim blanket GDPR compliance.
 
@@ -35,6 +37,8 @@ Authoritative AP guidance retrieved on 10 October 2026 (initial old URLs could n
 - [Tip or complaint](https://autoriteitpersoonsgegevens.nl/een-tip-of-klacht-indienen-bij-de-ap).
 
 ## Verification
+
+Provider-facts follow-up: `node --test` rerun with 85 passing tests. A focused Chromium probe verified rendered STRATO/TransIP facts, explicit hosting/basis/retention gaps, privacy layout at 320/375/844/1280px and enlarged text, zero informational-page storage writes, complete fictional records through app/privacy/manual/return navigation, zero page errors and zero external requests. No email was sent. Application/manual scripts, styles and release versions remain unchanged from approved head `68da715a3c5b915099b55d364d8ac96bbaa11234`. Existing screenshot and broader regression evidence below is from the initial footer implementation; no redundant full recapture was performed for this prose-only follow-up.
 
 - `node --test`: 85 tests passed, zero failed. Added focused footer/privacy/package contracts; updated old blanket external-URL assertions to forbid external resources while allowing ordinary approved links.
 - `scripts/verify-footer-privacy.py`: 16 acceptance groups across all three pages at 320x740, 375x812, 844x390 and 1280x900. Real app/privacy/manual/return navigation preserves complete fictional stored JSON; informational pages make zero localStorage writes. Exact mailto and LinkedIn targets, sequential footer Tab order, focus outline, wrapping, no document overflow, enlarged text and print hiding pass. No pre-click external requests; deliberate LinkedIn navigation is intercepted and blocked. No email sent.
