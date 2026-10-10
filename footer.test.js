@@ -5,7 +5,7 @@ const read = name => fs.existsSync(name) ? fs.readFileSync(name, 'utf8') : '';
 test('every public page has the approved compact footer and same release', () => {
   for (const name of ['index.html', 'uitleg.html', 'privacy.html']) {
     const html = read(name), footer = html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '';
-    for (const text of ['Robert Postma', 'href="https://www.linkedin.com/in/robert-postma-6abb1a79"', 'href="uitleg.html"', 'href="privacy.html"', 'href="mailto:robert@wicaro.nl"', 'Versie 2026.10.2']) assert.ok(footer.includes(text), `${name}: ${text}`);
+    for (const text of ['Robert Postma', 'href="https://www.linkedin.com/in/robert-postma-6abb1a79"', 'href="uitleg.html"', 'href="privacy.html"', 'href="mailto:robert@wicaro.nl"', 'Versie 2026.10.3']) assert.ok(footer.includes(text), `${name}: ${text}`);
     assert.match(html, /href="footer.css"/);
     assert.match(footer, /aria-label="Footer"/);
     assert.match(footer, /Stuur geen kindernamen of volledige back-ups/);
