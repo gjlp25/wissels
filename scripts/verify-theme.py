@@ -149,6 +149,13 @@ try:
     assert page.locator('#benchWarning').is_visible()
     saved=db(page);match=json.loads(saved)['matches'][0]['id']
     assert not page.locator('#undo').is_disabled()
+    page.locator('[data-theme-choice=light]').focus()
+    page.keyboard.press('Tab');page.keyboard.press('Enter');theme(page,'dark')
+    assert db(page)==saved and not page.locator('#undo').is_disabled()
+    assert page.evaluate("localStorage.getItem('pupillentrainer-theme')")=='dark'
+    page.keyboard.press('Shift+Tab');page.keyboard.press('Space');theme(page,'light')
+    assert db(page)==saved and not page.locator('#undo').is_disabled()
+    assert page.evaluate("localStorage.getItem('pupillentrainer-theme')")=='light'
     page.locator('#fairness').evaluate('e=>e.open=true');page.click('#matchModeBtn')
     # Compare existing light colors and pitch geometry to the unchanged inline CSS.
     page.locator('[data-theme-choice=light]').click()
