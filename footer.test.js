@@ -5,7 +5,7 @@ const read = name => fs.existsSync(name) ? fs.readFileSync(name, 'utf8') : '';
 test('every public page has the approved compact footer and same release', () => {
   for (const name of ['index.html', 'uitleg.html', 'privacy.html']) {
     const html = read(name), footer = html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '';
-    for (const text of ['Robert Postma', 'href="https://www.linkedin.com/in/robert-postma-6abb1a79"', 'href="uitleg.html"', 'href="privacy.html"', 'href="mailto:robert@wicaro.nl"', 'Versie 2026.10.1']) assert.ok(footer.includes(text), `${name}: ${text}`);
+    for (const text of ['Robert Postma', 'href="https://www.linkedin.com/in/robert-postma-6abb1a79"', 'href="uitleg.html"', 'href="privacy.html"', 'href="mailto:robert@wicaro.nl"', 'Versie 2026.10.2']) assert.ok(footer.includes(text), `${name}: ${text}`);
     assert.match(html, /href="footer.css"/);
     assert.match(footer, /aria-label="Footer"/);
     assert.match(footer, /Stuur geen kindernamen of volledige back-ups/);
@@ -23,7 +23,7 @@ test('production package includes every new public resource', () => {
 test('privacy explains actual storage, deletion, exports and unresolved hosting scope', () => {
   const html = read('privacy.html');
   for (const term of ['<html lang="nl">', 'localStorage', 'wissels-jo9', 'niet versleuteld', 'protocol', 'geen automatische synchronisatie', 'vervangt', 'JSON', 'PDF', 'sitegegevens', 'robert@wicaro.nl', 'Nog te bevestigen', 'IP-adres', 'mailprovider', 'Autoriteit Persoonsgegevens']) assert.ok(html.includes(term), term);
-  assert.doesNotMatch(html, /<script|<form|AVG-compliant|AVG-proof|geen persoonsgegevens/);
+  assert.doesNotMatch(html, /<script(?! src="theme\.js"><\/script>)|<form|AVG-compliant|AVG-proof|geen persoonsgegevens/);
   assert.match(html, /href="index.html"/);
   assert.match(html, /class="site-footer"/);
 });

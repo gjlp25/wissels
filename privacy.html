@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy &amp; gegevens: PupillenTrainer</title>
+<script src="theme.js"></script>
 <style>
   :root {
     --primary: #006948;
@@ -80,14 +81,17 @@
   @media print { body { background: #fff; max-width: none } header, footer, .contents { display: none } section, .intro { box-shadow: none } img { max-height: 16cm; width: auto } figure { break-inside: avoid } }
 </style>
 <link rel="stylesheet" href="footer.css">
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
-<header><p><a class="button" href="index.html">Terug naar Wisselschema</a></p><div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Privacy &amp; gegevens</h1></div></header>
+<header><p><a class="button" href="index.html">Terug naar Wisselschema</a></p><div class="brand"><img src="assets/branding/logo.webp" alt=""><h1>Privacy &amp; gegevens</h1></div><div class="theme-control"><label for="themeChoice">Weergave</label><select id="themeChoice"><option value="system">Systeem</option><option value="light">Licht</option><option value="dark">Donker</option></select></div>
+</header>
 <main>
 <div class="intro"><p>PupillenTrainer helpt je teams en wisselschema’s voor te bereiden. Hieronder lees je wat deze versie met gegevens doet en hoe je ze zelf bewaart of verwijdert.</p><p><strong>Concept vóór publicatie:</strong> Robert wil de app op Vercel hosten. De live instellingen en de afspraken voor feedbackmail zijn nog niet vastgesteld. De uitleg over browseropslag hieronder beschrijft de app. Deze pagina is nog geen volledige privacyverklaring voor een specifieke live website.</p></div>
 <section><h2>Teams en wedstrijden in jouw browser</h2>
 <p>De app bewaart teamnamen, categorieën, spelersnamen en speler-ID’s, wedstrijden met datum en tegenstander, aanwezigheid, status, keeperkeuzes, schema’s, veldposities en de laatste herstelstap. Ook het gekozen team en gegevens over de laatste aangevraagde back-up worden bewaard.</p>
 <p>Dit staat in <strong>localStorage</strong>, onder de sleutel <code>wissels-jo9</code>. De app stuurt deze ingevoerde gegevens niet naar een app-server. Er is geen account en geen automatische synchronisatie. De app gebruikt deze opslag om je voorbereiding na opnieuw openen terug te tonen en totalen te berekenen.</p>
+<p>Je keuze voor Systeem, Licht of Donker wordt apart in localStorage bewaard onder <code>pupillentrainer-theme</code>. Deze weergavekeuze bevat geen team- of spelergegevens en zit niet in de JSON-back-up. Zonder eigen keuze volgt de app de instelling van je apparaat.</p>
 <p>De appopslag is <strong>niet versleuteld</strong>. Iedereen met toegang tot hetzelfde browserprofiel kan de app openen en de gegevens bekijken. Gebruik liever korte herkenbare namen of initialen en voer geen medische of andere gevoelige informatie in.</p>
 <p>Elke browser en elk apparaat heeft aparte opslag. Ook het webadres telt mee: protocol (http of https), domein en poort bepalen samen welke opslag wordt gebruikt. Een ander adres kan dus een lege app tonen. In privémodus kan de opslag verdwijnen wanneer je het venster sluit.</p>
 <p>De app wist gegevens niet na een vaste tijd. Ze blijven bewaard tot je ze verwijdert of vervangt, of de browser de opslag wist. Lokale opslag is geen garantie dat gegevens altijd beschikbaar blijven.</p></section>
@@ -107,7 +111,7 @@
 <p>Volgens Robert is het domein <code>pupillentrainer.nl</code> geregistreerd bij TransIP en wil hij de app op Vercel hosten. Vercel is dus de beoogde websitehost; TransIP is de domeinregistrar. Hiermee is niet vastgesteld dat de website al op Vercel draait of dat het domein eraan is gekoppeld.</p>
 <p>Vercel beschrijft in zijn <a href="https://vercel.com/legal/privacy-notice" rel="noreferrer">privacybeleid</a> dat het technische gegevens over verkeer naar gehoste websites verwerkt, waaronder IP-adressen en systeeminformatie. Dat staat los van de spelersgegevens in localStorage. Het beleid van Vercel beschrijft de verwerking door Vercel en legt niet vast hoe Robert zelf bezoekgegevens of feedbackmail behandelt.</p>
 <p><strong>Nog te bevestigen vóór publicatie:</strong> het live webadres en de verantwoordelijke beheerder, de gebruikte Vercel-instellingen en afspraken over technische bezoekgegevens. Voor deze website zijn nog geen bewaartermijn, verwerkingslocatie of toepasselijke contractafspraken vastgesteld.</p>
-<p>Deze appversie bevat geen analytics, trackingpixels, advertentietools of cookies die de app zelf plaatst. De browseropslag hierboven is voor het bewaren van je voorbereiding. Er is geen LinkedIn-widget: de gewone link opent pas na je klik de externe website, waar het privacybeleid van LinkedIn geldt.</p></section>
+<p>Deze appversie bevat geen analytics, trackingpixels, advertentietools of cookies die de app zelf plaatst. De browseropslag hierboven is voor het bewaren van je voorbereiding en weergavekeuze. Er is geen LinkedIn-widget: de gewone link opent pas na je klik de externe website, waar het privacybeleid van LinkedIn geldt.</p></section>
 <section><h2>Feedback en privacyvragen</h2>
 <p>Maker en contactpersoon voor de app is Robert Postma: <a href="mailto:robert@wicaro.nl">robert@wicaro.nl</a>. Feedback opent je eigen mailprogramma. Er wordt pas mail verstuurd als je die zelf verzendt.</p>
 <p>Bij verzending ontvangen Robert en de betrokken mailproviders je e-mailadres, eventuele naam, bericht en eventuele bijlagen, plus technische mailgegevens. Je bericht is bedoeld om je vraag te beantwoorden of een fout in de app te bespreken. <strong>Stuur geen kindernamen of volledige back-ups.</strong> Beschrijf het probleem met verzonnen namen.</p>
@@ -121,7 +125,7 @@
   <div class="footer-row">
     <p class="creator-credit">Gemaakt door Robert Postma · <a href="https://www.linkedin.com/in/robert-postma-6abb1a79" rel="noreferrer">LinkedIn</a></p>
     <nav aria-label="Footer"><a href="uitleg.html">Uitleg</a><a href="privacy.html">Privacy &amp; gegevens</a><a href="mailto:robert@wicaro.nl">Feedback</a></nav>
-    <small title="Release met privacy-informatie en feedbacklinks">Versie 2026.10.1</small>
+    <small title="Release met lichte en donkere weergave">Versie 2026.10.2</small>
   </div>
   <p class="feedback-note">Feedback per e-mail. Stuur geen kindernamen of volledige back-ups.</p>
 </footer>

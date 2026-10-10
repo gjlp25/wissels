@@ -46,7 +46,8 @@ test('creator footers preserve manual return navigation and app print isolation'
 // Real scheduling/storage contracts remain covered by the generator and handler suites.
 test('production scripts remain local, loaded in order and included in Docker', () => {
   assert.match(read('index.html'), /<script src="schedule.js"><\/script>\s*<script>/);
-  assert.equal((read('index.html').match(/<script/g) || []).length, 2);
+  assert.equal((read('index.html').match(/<script/g) || []).length, 3);
+  assert.match(read('index.html'), /<script src="theme.js"><\/script>[\s\S]*<script src="schedule.js">/);
   assert.match(read('Dockerfile'), /COPY index.html schedule.js uitleg.html/);
   assert.match(read('schedule.js'), /module.exports/);
 });

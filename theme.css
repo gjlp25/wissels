@@ -1,0 +1,82 @@
+/* Shared appearance only; existing geometry and light palette are retained. */
+:root {
+    color-scheme: light;
+    --primary: #006948; --primary-hover: #005137; --primary-light: #e6f5ef;
+    --secondary: #006398; --surface: #faf8ff; --card: #fff; --subtle: #f2f3f8;
+    --text: #131b2e; --muted: #475569; --border: #dce3ec; --control-border: #8593a5; --error: #ba1a1a;
+    --button: #006948; --button-hover: #005137; --token: #006398;
+    --on: #c8ebd0; --on-text: #005137; --on-hover: #b2e4bc;
+    --off: #f4f5f8; --off-hover: #e2e7ef; --keeper: #fef08a; --keeper-text: #713f12;
+    --danger-bg: #fff0ee; --danger-border: #e59b9b; --chip-hover: #ffdad6;
+    --warning-bg: #fffbeb; --warning-text: #78350f; --warning-border: #d97706;
+    --bench: #e2e7ef; --logo-backing: transparent;
+}
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --primary: #8cddb7; --primary-hover: #abefcc; --primary-light: #183e32;
+    --secondary: #75c8ff; --surface: #111827; --card: #192333; --subtle: #253044;
+    --text: #edf2fa; --muted: #bdc9da; --border: #52647d; --control-border: #8192ab; --error: #ffb4ab;
+    --button: #006948; --button-hover: #005137; --token: #006398;
+    --on: #194d39; --on-text: #abefc6; --on-hover: #236447;
+    --off: #253044; --off-hover: #35445c; --keeper: #655018; --keeper-text: #fff2a0;
+    --danger-bg: #44252b; --danger-border: #df8d88; --chip-hover: #44252b;
+    --warning-bg: #41351b; --warning-text: #ffe0a3; --warning-border: #efb35f;
+    --bench: #253044; --logo-backing: #faf8ff;
+  }
+}
+/* System fallback also works without JavaScript. Explicit light always wins. */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --primary: #8cddb7; --primary-hover: #abefcc; --primary-light: #183e32;
+    --secondary: #75c8ff; --surface: #111827; --card: #192333; --subtle: #253044;
+    --text: #edf2fa; --muted: #bdc9da; --border: #52647d; --control-border: #8192ab; --error: #ffb4ab;
+    --button: #006948; --button-hover: #005137; --token: #006398;
+    --on: #194d39; --on-text: #abefc6; --on-hover: #236447;
+    --off: #253044; --off-hover: #35445c; --keeper: #655018; --keeper-text: #fff2a0;
+    --danger-bg: #44252b; --danger-border: #df8d88; --chip-hover: #44252b;
+    --warning-bg: #41351b; --warning-text: #ffe0a3; --warning-border: #efb35f;
+    --bench: #253044; --logo-backing: #faf8ff;
+  }
+}
+
+.theme-control { display: none; flex-wrap: wrap; align-items: center; gap: .4rem; max-width: 100%; font-size: .875rem; }
+:root[data-theme] .theme-control { display: flex; }
+.theme-control select { font-family: inherit; padding: .5rem .7rem; font-size: 1rem; min-height: 42px; max-width: 100%; min-width: 0; border: 1px solid var(--muted); border-radius: 6px; background: var(--card); color: var(--text); }
+@media screen {
+  input, select { background: var(--card); }
+  button, .button, .app-header nav a { background: var(--button); }
+  button:hover, .button:hover, .app-header nav a:hover { background: var(--button-hover); }
+  button.alt { background: var(--card); }
+  button.alt:hover { background: var(--subtle); }
+  header .button { background: var(--card); }
+  header .button:hover { background: var(--primary-light); }
+  #delTeam, #delMatch { background: var(--card); border-color: var(--danger-border); }
+  #delTeam:hover, #delMatch:hover { background: var(--danger-bg); }
+  .chip button { background: none; }
+  .chip button:hover { background: var(--chip-hover); }
+  td:first-child { background: var(--card); }
+  tr.count td:first-child { background: var(--subtle); }
+  .on { background: var(--on); color: var(--on-text); }
+  .off { background: var(--off); }
+  td.on:hover { background: var(--on-hover); }
+  td.off:hover { background: var(--off-hover); }
+  .k { background: var(--keeper); color: var(--keeper-text); }
+  #benchWarning { background: var(--danger-bg); border-color: var(--danger-border); border-left-color: var(--error); }
+  .warning { background: var(--warning-bg); border-left-color: var(--warning-border); }
+  .warning h2 { color: var(--warning-text); }
+  section.warning { background: var(--card); border-left-color: var(--primary); }
+  section.warning h2 { color: var(--text); }
+  #bench { background: var(--bench); }
+  .token { background: var(--token); }
+  .token.k { background: #f6bd34; color: #382600; }
+  .slotbtn.active { background: var(--button-hover); }
+  .brand img { background: var(--logo-backing); }
+}
+/* Printing/PDF never inherits dark tokens, even when the screen is dark. */
+@media print {
+  :root { color-scheme: light; --primary: #006948; --primary-hover: #005137; --primary-light: #e6f5ef; --secondary: #006398; --surface: #fff; --card: #fff; --subtle: #f2f3f8; --text: #131b2e; --muted: #475569; --border: #dce3ec; --control-border: #8593a5; --error: #ba1a1a; }
+  body { background: #fff; color: #131b2e; }
+  .theme-control { display: none !important; }
+}

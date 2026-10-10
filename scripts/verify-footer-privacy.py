@@ -57,7 +57,7 @@ try:
                     assert page.evaluate('window.storageWrites') == 0
                 footer = page.locator('.site-footer')
                 assert footer.locator('.creator-credit').count() == 1
-                assert footer.get_by_text('Versie 2026.10.1').count() == 1
+                assert footer.get_by_text('Versie 2026.10.2').count() == 1
                 assert footer.get_by_role('link', name='LinkedIn').get_attribute('href') == 'https://www.linkedin.com/in/robert-postma-6abb1a79'
                 assert footer.get_by_role('link', name='Feedback').get_attribute('href') == 'mailto:robert@wicaro.nl'
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
